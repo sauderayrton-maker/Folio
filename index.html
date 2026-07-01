@@ -1,0 +1,1887 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Folio — Build your career. Plan your life.</title>
+        <meta
+            name="description"
+            content="A fast, beautiful résumé and cover-letter builder. Ten professional templates, live preview, one-page fit, and instant PDF export — free, in your browser."
+        />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap"
+        />
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            :root {
+                --font: "Inter", system-ui, sans-serif;
+                --serif: "Source Serif 4", "Lora", Georgia, serif;
+                --mono: "JetBrains Mono", monospace;
+                --bg: #141210;
+                --bg-2: #1c1915;
+                --bg-3: #232018;
+                --surface: rgba(255, 245, 230, 0.04);
+                --surface-2: rgba(255, 245, 230, 0.07);
+                --border: rgba(200, 170, 120, 0.12);
+                --border-2: rgba(200, 170, 120, 0.22);
+                --text: #f0e8d8;
+                --text-2: #a89880;
+                --text-3: #6a5c48;
+                --accent: #c4622d;
+                --accent-warm: #d4874a;
+                --ok: #6b9c6b;
+                --paper: #f3ead9;
+                --paper-dim: #e6d9bf;
+                --ink: #211c12;
+            }
+            html {
+                scroll-behavior: smooth;
+            }
+            body {
+                font-family: var(--font);
+                background: var(--bg);
+                color: var(--text);
+                font-size: 16px;
+                line-height: 1.6;
+                -webkit-font-smoothing: antialiased;
+                overflow-x: hidden;
+            }
+            body::after {
+                content: "";
+                position: fixed;
+                inset: 0;
+                z-index: 1;
+                pointer-events: none;
+                opacity: 0.022;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            }
+            a {
+                color: inherit;
+            }
+            .wrap {
+                max-width: 1120px;
+                margin: 0 auto;
+                padding: 0 28px;
+                position: relative;
+                z-index: 2;
+            }
+
+            /* ── NAV ── */
+            nav {
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                background: rgba(18, 15, 12, 0);
+                border-bottom: 1px solid transparent;
+                transition: background 0.35s ease, border-color 0.35s ease;
+            }
+            nav.scrolled {
+                background: rgba(18, 15, 12, 0.82);
+                border-bottom-color: var(--border);
+            }
+            .nav-inner {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                height: 68px;
+            }
+            .brand {
+                font-family: var(--serif);
+                font-size: 19px;
+                font-weight: 700;
+                text-decoration: none;
+                letter-spacing: 0.3px;
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                color: var(--text);
+            }
+            .brand-mark {
+                width: 22px;
+                height: 22px;
+                background: var(--accent-warm);
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                font-size: 11px;
+                font-family: var(--mono);
+                color: #fff;
+                font-weight: 700;
+                letter-spacing: 0;
+            }
+            .brand em {
+                color: var(--accent-warm);
+                font-style: italic;
+            }
+            /* pill that wraps the three scroll-links */
+            .nav-pill {
+                display: flex;
+                align-items: center;
+                gap: 2px;
+                background: rgba(255,255,255,0.04);
+                border: 1px solid rgba(255,255,255,0.08);
+                border-radius: 99px;
+                padding: 4px;
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+            }
+            .nav-pill a {
+                text-decoration: none;
+                font-size: 13.5px;
+                font-weight: 500;
+                color: var(--text-2);
+                padding: 6px 16px;
+                border-radius: 99px;
+                transition: color 0.15s, background 0.15s;
+                white-space: nowrap;
+            }
+            .nav-pill a:hover {
+                color: var(--text);
+                background: rgba(255,255,255,0.06);
+            }
+            .nav-pill a.active {
+                color: #fff;
+                background: var(--accent-warm);
+            }
+            .nav-links {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .nav-links a {
+                text-decoration: none;
+                font-size: 14px;
+                color: var(--text-2);
+                transition: color 0.15s;
+            }
+            .nav-links a:hover {
+                color: var(--text);
+            }
+            .nav-links a.active {
+                color: var(--accent-warm);
+            }
+            .nav-links .nav-cta {
+                color: #fff;
+                background: var(--accent-warm);
+                border-color: var(--accent-warm);
+                font-weight: 600;
+            }
+            .nav-links .nav-cta:hover {
+                background: #b5561f;
+                border-color: #b5561f;
+            }
+            .nav-toggle {
+                display: none;
+                width: 38px;
+                height: 38px;
+                align-items: center;
+                justify-content: center;
+                background: var(--surface);
+                border: 1px solid var(--border-2);
+                border-radius: 8px;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+            .nav-toggle svg {
+                width: 18px;
+                height: 18px;
+                stroke: var(--text);
+                fill: none;
+                stroke-width: 1.8;
+                stroke-linecap: round;
+            }
+            .nav-toggle .i-close {
+                display: none;
+            }
+            nav.open .nav-toggle .i-burger {
+                display: none;
+            }
+            nav.open .nav-toggle .i-close {
+                display: block;
+            }
+
+            /* ── BUTTONS ── */
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 13px 24px;
+                border-radius: 10px;
+                font-size: 15px;
+                font-weight: 600;
+                text-decoration: none;
+                cursor: pointer;
+                border: 1px solid transparent;
+                transition: all 0.18s;
+                font-family: var(--font);
+            }
+            .btn-primary {
+                background: var(--accent);
+                color: #fff;
+                box-shadow: 0 6px 24px rgba(196, 98, 45, 0.32);
+            }
+            .btn-primary:hover {
+                background: var(--accent-warm);
+                transform: translateY(-2px);
+                box-shadow: 0 10px 32px rgba(196, 98, 45, 0.42);
+            }
+            .btn-ghost {
+                background: var(--surface);
+                border-color: var(--border-2);
+                color: var(--text);
+            }
+            .btn-ghost:hover {
+                background: var(--surface-2);
+                border-color: var(--accent);
+            }
+            .btn-sm {
+                padding: 8px 16px;
+                font-size: 13.5px;
+                border-radius: 8px;
+            }
+
+            /* ── HERO ── */
+            .hero {
+                position: relative;
+                padding: 84px 0 96px;
+            }
+            .hero::before {
+                content: "";
+                position: absolute;
+                top: -120px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 900px;
+                height: 600px;
+                background: radial-gradient(
+                    ellipse at center,
+                    rgba(196, 98, 45, 0.16),
+                    transparent 62%
+                );
+                pointer-events: none;
+                z-index: 0;
+            }
+            .hero-grid {
+                display: grid;
+                grid-template-columns: 1.05fr 0.95fr;
+                gap: 56px;
+                align-items: center;
+            }
+            .eyebrow {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                font-family: var(--mono);
+                font-size: 12px;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: var(--accent-warm);
+                background: rgba(196, 98, 45, 0.1);
+                border: 1px solid rgba(196, 98, 45, 0.25);
+                padding: 5px 13px;
+                border-radius: 20px;
+                margin-bottom: 24px;
+            }
+            h1 {
+                font-family: var(--serif);
+                font-size: clamp(40px, 5.6vw, 62px);
+                line-height: 1.04;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+                margin-bottom: 22px;
+            }
+            h1 em {
+                font-style: italic;
+                color: var(--accent-warm);
+            }
+            .lead {
+                font-size: 18px;
+                color: var(--text-2);
+                max-width: 520px;
+                margin-bottom: 32px;
+                font-weight: 300;
+            }
+            .hero-cta {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                flex-wrap: wrap;
+            }
+            .hero-note {
+                margin-top: 18px;
+                font-size: 13px;
+                color: var(--text-3);
+                font-family: var(--mono);
+                letter-spacing: 0.3px;
+            }
+
+            /* ── HERO DEMO: THE TYPE CASE ── */
+            .type-case {
+                position: relative;
+            }
+            .tc-toolbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                margin-bottom: 14px;
+                padding: 0 2px;
+            }
+            .tc-swatches {
+                display: flex;
+                gap: 9px;
+            }
+            .tc-swatch {
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                background: var(--c);
+                border: 2px solid rgba(240, 232, 216, 0.18);
+                padding: 0;
+                cursor: pointer;
+                transition:
+                    transform 0.15s ease,
+                    border-color 0.15s ease;
+            }
+            .tc-swatch:hover {
+                transform: translateY(-2px);
+            }
+            .tc-swatch.active {
+                border-color: var(--text);
+                box-shadow: 0 0 0 3px rgba(240, 232, 216, 0.12);
+            }
+            .tc-spec {
+                font-family: var(--mono);
+                font-size: 11px;
+                letter-spacing: 0.3px;
+                color: var(--text-3);
+                text-align: right;
+                white-space: nowrap;
+            }
+            .tc-spec b {
+                color: var(--text-2);
+                font-weight: 500;
+            }
+            .tc-paper-wrap {
+                position: relative;
+                perspective: 1600px;
+            }
+            .tc-paper {
+                position: relative;
+                z-index: 2;
+                background: var(--paper);
+                border-radius: 5px;
+                overflow: hidden;
+                box-shadow:
+                    0 2px 10px rgba(0, 0, 0, 0.4),
+                    0 30px 80px rgba(0, 0, 0, 0.55);
+                transform: rotate(-1.1deg);
+                transition: background 0.25s ease;
+            }
+            .tc-head {
+                padding: 24px 26px 18px;
+                border-bottom: 2px solid var(--tc-c, var(--accent));
+                text-align: center;
+                transition:
+                    border-color 0.25s ease,
+                    background 0.25s ease;
+            }
+            .tc-name {
+                font-family: var(--serif);
+                font-weight: 700;
+                font-size: 22px;
+                color: var(--ink);
+                letter-spacing: 0.3px;
+            }
+            .tc-role {
+                margin-top: 6px;
+                font-family: var(--mono);
+                font-size: 10.5px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: var(--tc-c, var(--accent));
+                transition: color 0.25s ease;
+            }
+            .tc-body {
+                display: grid;
+                grid-template-columns: 1fr 0.42fr;
+                gap: 18px;
+                padding: 20px 26px 28px;
+            }
+            .tc-label {
+                font-family: var(--mono);
+                font-size: 7px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: var(--tc-c, var(--accent));
+                border-bottom: 1px solid var(--paper-dim);
+                padding-bottom: 4px;
+                margin-bottom: 9px;
+                transition: color 0.25s ease;
+            }
+            .tc-line {
+                height: 6px;
+                border-radius: 3px;
+                background: var(--paper-dim);
+                margin-bottom: 6px;
+                opacity: 0.85;
+            }
+            .tc-line.sm {
+                opacity: 0.6;
+            }
+            .tc-block {
+                margin-bottom: 16px;
+            }
+            .tc-chip-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            .tc-chip {
+                height: 13px;
+                width: 38px;
+                border-radius: 3px;
+                background: var(--paper-dim);
+                opacity: 0.85;
+            }
+            .tc-paper[data-t="modern"] .tc-head {
+                border-bottom: none;
+                border-left: 3px solid var(--tc-c, var(--accent));
+                text-align: left;
+            }
+            .tc-paper[data-t="bold"] .tc-head {
+                background: var(--tc-c, var(--accent));
+                border: none;
+            }
+            .tc-paper[data-t="bold"] .tc-name,
+            .tc-paper[data-t="bold"] .tc-role {
+                color: #fff;
+            }
+            .tc-paper[data-t="elegant"] .tc-head {
+                border-bottom: 3px double var(--tc-c, var(--accent));
+            }
+            .tc-paper[data-t="onyx"] {
+                background: #1a1712;
+            }
+            .tc-paper[data-t="onyx"] .tc-name {
+                color: #f0e8d8;
+            }
+            .tc-paper[data-t="onyx"] .tc-line,
+            .tc-paper[data-t="onyx"] .tc-chip {
+                background: #332d22;
+            }
+            .tc-paper[data-t="onyx"] .tc-label {
+                border-bottom-color: #332d22;
+            }
+            .tc-meta {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 14px;
+                padding: 0 2px;
+                font-family: var(--mono);
+                font-size: 12px;
+                color: var(--text-3);
+            }
+            .tc-meta .dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: var(--ok);
+                display: inline-block;
+                margin-right: 7px;
+            }
+
+            /* ── STRIP ── */
+            .strip {
+                border-top: 1px solid var(--border);
+                border-bottom: 1px solid var(--border);
+                background: var(--bg-2);
+            }
+            .strip-inner {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 14px 40px;
+                padding: 22px 0;
+            }
+            .strip-item {
+                font-family: var(--mono);
+                font-size: 13px;
+                color: var(--text-3);
+                display: flex;
+                align-items: center;
+                gap: 9px;
+            }
+            .strip-item b {
+                color: var(--accent-warm);
+                font-weight: 500;
+            }
+
+            /* ── SECTIONS ── */
+            section.block {
+                padding: 92px 0;
+            }
+            .sec-head {
+                text-align: center;
+                max-width: 640px;
+                margin: 0 auto 52px;
+            }
+            .sec-tag {
+                font-family: var(--mono);
+                font-size: 12px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: var(--accent);
+                margin-bottom: 14px;
+            }
+            .sec-head h2 {
+                font-family: var(--serif);
+                font-size: clamp(28px, 4vw, 40px);
+                font-weight: 600;
+                line-height: 1.12;
+                letter-spacing: -0.3px;
+                margin-bottom: 14px;
+            }
+            .sec-head p {
+                color: var(--text-2);
+                font-size: 17px;
+                font-weight: 300;
+            }
+
+            /* ── TEMPLATES ── */
+            .tpl-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 18px;
+            }
+            .tpl {
+                text-align: center;
+            }
+            .tpl .thumb {
+                --c: var(--tpl-accent, var(--accent));
+                aspect-ratio: 8.5 / 11;
+                background: #fff;
+                border-radius: 4px;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                transition:
+                    transform 0.2s,
+                    box-shadow 0.2s;
+            }
+            .tpl:hover .thumb {
+                transform: translateY(-6px);
+                box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+            }
+            .tpl .t-head {
+                height: 24%;
+                border-bottom: 2px solid var(--c);
+            }
+            .tpl .t-body {
+                flex: 1;
+                display: flex;
+                gap: 4px;
+                padding: 6px;
+            }
+            .tpl .t-col {
+                flex: 1;
+                background: repeating-linear-gradient(
+                    #dcdcdc 0 2px,
+                    transparent 2px 6px
+                );
+            }
+            .tpl .t-side {
+                width: 32%;
+                background: repeating-linear-gradient(
+                    #e6e6e6 0 2px,
+                    transparent 2px 6px
+                );
+            }
+            .tpl[data-t="modern"] .t-head {
+                border-bottom: none;
+                border-left: 3px solid var(--c);
+            }
+            .tpl[data-t="modern"] .t-body {
+                flex-direction: row-reverse;
+            }
+            .tpl[data-t="modern"] .t-side {
+                width: 36%;
+                background: #ece7df;
+            }
+            .tpl[data-t="minimal"] .t-head {
+                border-bottom: 1px solid #ddd;
+                height: 20%;
+            }
+            .tpl[data-t="bold"] .t-head {
+                background: var(--c);
+                border: none;
+                height: 30%;
+            }
+            .tpl[data-t="onyx"] .thumb {
+                background: #1a1712;
+            }
+            .tpl[data-t="onyx"] .t-head {
+                background: #100d0a;
+            }
+            .tpl[data-t="onyx"] .t-col,
+            .tpl[data-t="onyx"] .t-side {
+                background: repeating-linear-gradient(
+                    #3a342b 0 2px,
+                    transparent 2px 6px
+                );
+            }
+            .tpl[data-t="elegant"] .t-head {
+                border-bottom: 3px double var(--c);
+            }
+            .tpl[data-t="slate"] .t-head {
+                background: #2b2b30;
+                border-bottom: 2px solid var(--c);
+            }
+            .tpl[data-t="sidebar"] .t-body {
+                flex-direction: row-reverse;
+            }
+            .tpl[data-t="sidebar"] .t-side {
+                width: 38%;
+                background: var(--c);
+                opacity: 0.92;
+            }
+            .tpl[data-t="timeline"] .t-col {
+                margin-left: 4px;
+                border-left: 2px solid var(--c);
+                padding-left: 4px;
+            }
+            .tpl[data-t="mono"] .t-col,
+            .tpl[data-t="mono"] .t-side {
+                background: repeating-linear-gradient(
+                    #cfcfcf 0 2px,
+                    transparent 2px 7px
+                );
+            }
+            .tpl span {
+                display: block;
+                margin-top: 12px;
+                font-size: 14px;
+                color: var(--text-2);
+            }
+            .accent-dots {
+                display: flex;
+                justify-content: center;
+                gap: 12px;
+                margin-top: 44px;
+                align-items: center;
+            }
+            .accent-dots .lbl {
+                font-family: var(--mono);
+                font-size: 12px;
+                color: var(--text-3);
+                letter-spacing: 0.5px;
+            }
+            .accent-dots i {
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                display: inline-block;
+                cursor: pointer;
+                border: 2px solid transparent;
+                transition:
+                    transform 0.15s ease,
+                    border-color 0.15s ease;
+            }
+            .accent-dots i:hover {
+                transform: translateY(-2px);
+            }
+            .accent-dots i.active {
+                border-color: var(--text);
+            }
+
+            /* ── FEATURES ── */
+            .feat-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 18px;
+            }
+            .feat {
+                background: var(--bg-2);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 26px 24px;
+                transition:
+                    border-color 0.18s,
+                    transform 0.18s;
+            }
+            .feat:hover {
+                border-color: var(--border-2);
+                transform: translateY(-3px);
+            }
+            .feat .ico {
+                width: 42px;
+                height: 42px;
+                border-radius: 10px;
+                background: rgba(196, 98, 45, 0.12);
+                border: 1px solid rgba(196, 98, 45, 0.25);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 16px;
+            }
+            .feat .ico svg {
+                width: 21px;
+                height: 21px;
+                fill: none;
+                stroke: var(--accent-warm);
+                stroke-width: 1.6;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+            .feat h3 {
+                font-size: 17px;
+                font-weight: 600;
+                margin-bottom: 7px;
+            }
+            .feat p {
+                font-size: 14.5px;
+                color: var(--text-2);
+                font-weight: 300;
+            }
+
+            /* ── STEPS ── */
+            .steps {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 30px;
+                counter-reset: step;
+            }
+            .step {
+                position: relative;
+                padding-top: 8px;
+            }
+            .step .num {
+                font-family: var(--serif);
+                font-size: 44px;
+                font-weight: 700;
+                color: var(--accent);
+                line-height: 1;
+                margin-bottom: 14px;
+                opacity: 0.9;
+            }
+            .step h3 {
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+            .step p {
+                color: var(--text-2);
+                font-size: 15px;
+                font-weight: 300;
+            }
+
+            /* ── FINAL CTA ── */
+            .final {
+                position: relative;
+                margin: 0 0 0;
+                padding: 96px 0;
+                text-align: center;
+                overflow: hidden;
+            }
+            .final::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(
+                    ellipse at center,
+                    rgba(196, 98, 45, 0.14),
+                    transparent 65%
+                );
+            }
+            .final h2 {
+                font-family: var(--serif);
+                font-size: clamp(30px, 4.6vw, 46px);
+                font-weight: 700;
+                letter-spacing: -0.3px;
+                margin-bottom: 18px;
+            }
+            .final p {
+                color: var(--text-2);
+                font-size: 18px;
+                font-weight: 300;
+                margin-bottom: 34px;
+            }
+
+            /* ── FOOTER ── */
+            footer {
+                border-top: 1px solid var(--border);
+                padding: 30px 0;
+                background: var(--bg-2);
+            }
+            .foot-inner {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 12px;
+                font-size: 13.5px;
+                color: var(--text-3);
+            }
+            .foot-inner .brand {
+                font-size: 16px;
+            }
+
+            /* reveal on load */
+            .reveal {
+                opacity: 0;
+                transform: translateY(16px);
+                animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+            }
+            .d1 {
+                animation-delay: 0.05s;
+            }
+            .d2 {
+                animation-delay: 0.15s;
+            }
+            .d3 {
+                animation-delay: 0.25s;
+            }
+            @keyframes rise {
+                to {
+                    opacity: 1;
+                    transform: none;
+                }
+            }
+            .reveal-on-scroll {
+                opacity: 0;
+                transform: translateY(14px);
+                transition:
+                    opacity 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+                    transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+            }
+            .reveal-on-scroll.revealed {
+                opacity: 1;
+                transform: none;
+            }
+            .tpl-grid .reveal-on-scroll:nth-child(5n + 1) {
+                transition-delay: 0s;
+            }
+            .tpl-grid .reveal-on-scroll:nth-child(5n + 2) {
+                transition-delay: 0.05s;
+            }
+            .tpl-grid .reveal-on-scroll:nth-child(5n + 3) {
+                transition-delay: 0.1s;
+            }
+            .tpl-grid .reveal-on-scroll:nth-child(5n + 4) {
+                transition-delay: 0.15s;
+            }
+            .tpl-grid .reveal-on-scroll:nth-child(5n + 5) {
+                transition-delay: 0.2s;
+            }
+            .feat-grid .reveal-on-scroll:nth-child(3n + 1) {
+                transition-delay: 0s;
+            }
+            .feat-grid .reveal-on-scroll:nth-child(3n + 2) {
+                transition-delay: 0.08s;
+            }
+            .feat-grid .reveal-on-scroll:nth-child(3n + 3) {
+                transition-delay: 0.16s;
+            }
+            .steps .reveal-on-scroll:nth-child(3n + 1) {
+                transition-delay: 0s;
+            }
+            .steps .reveal-on-scroll:nth-child(3n + 2) {
+                transition-delay: 0.1s;
+            }
+            .steps .reveal-on-scroll:nth-child(3n + 3) {
+                transition-delay: 0.2s;
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .reveal-on-scroll {
+                    opacity: 1;
+                    transform: none;
+                    transition: none;
+                }
+            }
+
+            /* ── RESPONSIVE ── */
+            @media (max-width: 900px) {
+                .hero-grid {
+                    grid-template-columns: 1fr;
+                    gap: 60px;
+                }
+                .type-case {
+                    max-width: 380px;
+                    margin: 0 auto;
+                }
+                .tpl-grid {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+                .feat-grid,
+                .steps {
+                    grid-template-columns: 1fr;
+                }
+            }
+            @media (max-width: 720px) {
+                .nav-toggle {
+                    display: inline-flex;
+                }
+                .nav-pill {
+                    display: none;
+                }
+                .nav-links {
+                    position: absolute;
+                    top: 68px;
+                    left: 0;
+                    right: 0;
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 2px;
+                    padding: 10px 20px 22px;
+                    background: #100d0b;
+                    border-bottom: 1px solid var(--border);
+                    max-height: 0;
+                    overflow: hidden;
+                    visibility: hidden;
+                    transition:
+                        max-height 0.25s ease,
+                        padding 0.25s ease;
+                }
+                nav.open .nav-pill {
+                    display: flex;
+                    position: absolute;
+                    top: 68px;
+                    left: 0;
+                    right: 0;
+                    border-radius: 0;
+                    border: none;
+                    border-bottom: 1px solid var(--border);
+                    background: #100d0b;
+                    flex-direction: column;
+                    padding: 10px 20px 12px;
+                    gap: 0;
+                    backdrop-filter: none;
+                }
+                nav.open .nav-pill a {
+                    border-radius: 0;
+                    padding: 13px 6px;
+                    border-bottom: 1px solid var(--border);
+                    font-size: 15.5px;
+                }
+                nav.open .nav-pill a.active {
+                    background: transparent;
+                    color: var(--accent-warm);
+                }
+                nav.open .nav-links {
+                    top: calc(68px + 175px);
+                    max-height: 100px;
+                    visibility: visible;
+                }
+                .nav-links a {
+                    padding: 13px 6px;
+                    border-bottom: 1px solid var(--border);
+                    font-size: 15.5px;
+                }
+                .nav-links .nav-cta {
+                    margin-top: 10px;
+                    text-align: center;
+                    justify-content: center;
+                    border-bottom: none;
+                }
+            }
+            @media (max-width: 560px) {
+                .wrap {
+                    padding: 0 20px;
+                }
+                .hero {
+                    padding: 48px 0 64px;
+                }
+                .hero-cta {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .hero-cta .btn {
+                    justify-content: center;
+                }
+                .strip-inner {
+                    gap: 10px 22px;
+                    padding: 16px 0;
+                }
+                .tpl-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 14px;
+                }
+                .sec-head {
+                    margin-bottom: 36px;
+                }
+                section.block {
+                    padding: 56px 0;
+                }
+                .final {
+                    padding: 64px 0;
+                }
+                .foot-inner {
+                    flex-direction: column;
+                    text-align: center;
+                }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                .reveal {
+                    animation: none;
+                }
+                .reveal {
+                    opacity: 1;
+                    transform: none;
+                }
+            }
+
+            /* ── FLOW SECTION ── */
+            .flow-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 64px;
+                align-items: center;
+            }
+            .flow-copy .sec-tag { text-align: left; margin-bottom: 14px; }
+            .flow-copy h2 {
+                font-family: var(--serif);
+                font-size: clamp(26px, 3.4vw, 38px);
+                font-weight: 600;
+                line-height: 1.14;
+                letter-spacing: -0.3px;
+                margin-bottom: 18px;
+                text-align: left;
+            }
+            .flow-copy h2 em { color: var(--accent-warm); font-style: italic; }
+            .flow-copy .lead { text-align: left; font-size: 16.5px; margin-bottom: 24px; }
+            .flow-list {
+                list-style: none;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 32px;
+            }
+            .flow-list li {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 15px;
+                color: var(--text-2);
+                font-weight: 300;
+            }
+            .flow-list li::before {
+                content: "✓";
+                font-size: 11px;
+                color: var(--ok);
+                font-weight: 700;
+                flex-shrink: 0;
+                width: 16px;
+            }
+            /* Flow preview card */
+            .fp-card {
+                background: var(--bg);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 24px;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 20px 60px rgba(0,0,0,.5);
+            }
+            .fp-card::before {
+                content: "";
+                position: absolute;
+                top: 0; left: 0; right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, var(--accent), var(--accent-warm), transparent 70%);
+                border-radius: 14px 14px 0 0;
+            }
+            .fp-meta {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-family: var(--mono);
+                font-size: 9.5px;
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                color: var(--text-3);
+                margin-bottom: 18px;
+            }
+            .fp-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+            .fp-dot.healthy { background: var(--ok); box-shadow: 0 0 5px rgba(107,156,107,.5); }
+            .fp-numbers {
+                display: grid;
+                grid-template-columns: 1fr auto 1fr auto 1fr;
+                gap: 0;
+                align-items: center;
+                margin-bottom: 16px;
+            }
+            .fp-divider { width: 1px; height: 34px; background: var(--border); }
+            .fp-num { padding: 0 14px; }
+            .fp-num:first-child { padding-left: 0; }
+            .fp-label {
+                font-family: var(--mono);
+                font-size: 9px;
+                letter-spacing: 0.4px;
+                text-transform: uppercase;
+                color: var(--text-3);
+                margin-bottom: 5px;
+            }
+            .fp-value {
+                font-size: 18px;
+                font-weight: 700;
+                letter-spacing: -0.4px;
+                color: var(--text-2);
+                line-height: 1;
+            }
+            .fp-value.income  { color: var(--accent-warm); }
+            .fp-value.healthy { color: var(--ok); }
+            .fp-sub { font-family: var(--mono); font-size: 9.5px; color: var(--text-4); margin-top: 4px; }
+            .fp-bar-wrap {
+                height: 5px;
+                background: var(--bg-2);
+                border-radius: 3px;
+                position: relative;
+                overflow: hidden;
+                margin-bottom: 8px;
+            }
+            .fp-bar-seg { position: absolute; top: 0; height: 100%; border-radius: 3px; }
+            .fp-tax      { background: rgba(184,90,69,.65); }
+            .fp-expenses { background: rgba(196,98,45,.6); }
+            .fp-savings  { background: rgba(196,150,45,.75); }
+            .fp-legend {
+                display: flex;
+                gap: 14px;
+                margin-bottom: 20px;
+            }
+            .fp-legend span {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                font-family: var(--mono);
+                font-size: 9.5px;
+                color: var(--text-3);
+            }
+            .fp-legend i { width: 6px; height: 6px; border-radius: 50%; display: block; }
+            .fp-goals { display: flex; flex-direction: column; gap: 7px; }
+            .fp-goal-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+            }
+            .fp-goal-name { font-size: 12.5px; color: var(--text-2); }
+            .fp-goal-timeline { font-family: var(--mono); font-size: 10px; color: var(--ok); }
+            .fp-goal-bar {
+                height: 3px;
+                background: var(--bg-3);
+                border-radius: 2px;
+                overflow: hidden;
+                margin-bottom: 4px;
+            }
+            .fp-goal-fill {
+                height: 100%;
+                background: linear-gradient(90deg, var(--ok), rgba(107,156,107,.35));
+                border-radius: 2px;
+            }
+            @media (max-width: 900px) {
+                .flow-grid { grid-template-columns: 1fr; gap: 40px; }
+            }
+
+            /* ── FINAL CTA two-button ── */
+            .final-cta-row {
+                display: flex;
+                gap: 14px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- NAV -->
+        <nav id="site-nav">
+            <div class="wrap nav-inner">
+                <a class="brand" href="index.html">
+                    <span class="brand-mark">F</span>
+                    Folio
+                </a>
+                <div class="nav-pill" id="nav-pill">
+                    <a href="#resume">Resume</a>
+                    <a href="#flow">Flow</a>
+                    <a href="#features">Features</a>
+                </div>
+                <div class="nav-links">
+                    <a class="btn btn-ghost btn-sm nav-cta" href="app.html"
+                        >Get started →</a
+                    >
+                </div>
+                <button
+                    class="nav-toggle"
+                    id="nav-toggle"
+                    aria-label="Toggle menu"
+                    aria-expanded="false"
+                >
+                    <svg class="i-burger" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                    <svg class="i-close" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6 6 18" />
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- HERO -->
+        <header class="hero">
+            <div class="wrap hero-grid">
+                <div class="hero-copy">
+                    <span class="eyebrow reveal d1"
+                        >✦ Free · No account · Runs in your browser</span
+                    >
+                    <h1 class="reveal d1">
+                        Build your career.<br><em>Plan the life you earn.</em>
+                    </h1>
+                    <p class="lead reveal d2">
+                        A résumé builder and a budget planner — two tools built for people who are serious about getting ahead. Everything runs privately in your browser.
+                    </p>
+                    <div class="hero-cta reveal d2">
+                        <a class="btn btn-primary" href="app.html" id="cta-main"
+                            >Build my résumé →</a
+                        >
+                        <a class="btn btn-ghost" href="budget.html"
+                            >Plan my budget →</a
+                        >
+                    </div>
+                    <div class="hero-note reveal d3" id="cta-note">
+                        No sign-up. Saves automatically. Nothing leaves your device.
+                    </div>
+                </div>
+
+                <!-- interactive product demo -->
+                <div class="type-case reveal d3">
+                    <div class="tc-toolbar">
+                        <div
+                            class="tc-swatches"
+                            id="tc-swatches"
+                            role="group"
+                            aria-label="Preview a template"
+                        >
+                            <button
+                                type="button"
+                                class="tc-swatch active"
+                                data-tpl="classic"
+                                data-c="#c4622d"
+                                style="--c: #c4622d"
+                                aria-label="Classic template"
+                            ></button>
+                            <button
+                                type="button"
+                                class="tc-swatch"
+                                data-tpl="modern"
+                                data-c="#2f6f8f"
+                                style="--c: #2f6f8f"
+                                aria-label="Modern template"
+                            ></button>
+                            <button
+                                type="button"
+                                class="tc-swatch"
+                                data-tpl="bold"
+                                data-c="#b23b4a"
+                                style="--c: #b23b4a"
+                                aria-label="Bold template"
+                            ></button>
+                            <button
+                                type="button"
+                                class="tc-swatch"
+                                data-tpl="elegant"
+                                data-c="#3f7d58"
+                                style="--c: #3f7d58"
+                                aria-label="Elegant template"
+                            ></button>
+                            <button
+                                type="button"
+                                class="tc-swatch"
+                                data-tpl="onyx"
+                                data-c="#5b53a6"
+                                style="--c: #5b53a6"
+                                aria-label="Onyx template"
+                            ></button>
+                        </div>
+                        <div class="tc-spec" id="tc-spec">
+                            <b>Classic</b> · Source Serif 4
+                        </div>
+                    </div>
+                    <div class="tc-paper-wrap">
+                        <div class="tc-paper" id="tc-paper" data-t="classic">
+                            <div class="tc-head">
+                                <div class="tc-name">Alex Morgan</div>
+                                <div class="tc-role">Senior Product Designer</div>
+                            </div>
+                            <div class="tc-body">
+                                <div>
+                                    <div class="tc-label">Experience</div>
+                                    <div class="tc-block">
+                                        <div class="tc-line" style="width: 65%"></div>
+                                        <div class="tc-line sm" style="width: 92%"></div>
+                                        <div class="tc-line sm" style="width: 85%"></div>
+                                        <div class="tc-line sm" style="width: 78%"></div>
+                                    </div>
+                                    <div class="tc-block">
+                                        <div class="tc-line" style="width: 58%"></div>
+                                        <div class="tc-line sm" style="width: 90%"></div>
+                                        <div class="tc-line sm" style="width: 82%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="tc-label">Skills</div>
+                                    <div class="tc-chip-row tc-block">
+                                        <span class="tc-chip"></span>
+                                        <span class="tc-chip"></span>
+                                        <span class="tc-chip"></span>
+                                        <span class="tc-chip"></span>
+                                    </div>
+                                    <div class="tc-label">Education</div>
+                                    <div class="tc-line sm" style="width: 90%"></div>
+                                    <div class="tc-line sm" style="width: 70%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tc-meta">
+                        <span><span class="dot"></span>Fits 1 page</span>
+                        <span>11pt · 0.6in margins</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- STRIP -->
+        <div class="strip">
+            <div class="wrap strip-inner">
+                <span class="strip-item">✓ Résumé <b>+</b> cover letter</span>
+                <span class="strip-item">✓ <b>10</b> templates · <b>7</b> colors</span>
+                <span class="strip-item">✓ Budget <b>+</b> savings planner</span>
+                <span class="strip-item">✓ Savings goals with <b>timelines</b></span>
+                <span class="strip-item">✓ <b>100%</b> private &amp; free</span>
+            </div>
+        </div>
+
+        <!-- RESUME -->
+        <section class="block" id="resume">
+            <div class="wrap">
+                <div class="sec-head">
+                    <div class="sec-tag">Resume Builder</div>
+                    <h2>Ten looks. One you.</h2>
+                    <p>
+                        Switch templates with a single click — your content
+                        stays put while the design transforms. Every one is
+                        print-ready and ATS-friendly.
+                    </p>
+                </div>
+                <div class="tpl-grid">
+                    <div class="tpl" data-t="classic">
+                        <div class="thumb">
+                            <div class="t-head"></div>
+                            <div class="t-body">
+                                <div class="t-col"></div>
+                                <div class="t-side"></div>
+                            </div>
+                        </div>
+                        <span>Classic</span>
+                    </div>
+                    <div class="tpl" data-t="modern">
+                        <div class="thumb">
+                            <div class="t-head"></div>
+                            <div class="t-body">
+                                <div class="t-col"></div>
+                                <div class="t-side"></div>
+                            </div>
+                        </div>
+                        <span>Modern</span>
+                    </div>
+                    <div class="tpl" data-t="minimal">
+                        <div class="thumb">
+                            <div class="t-head"></div>
+                            <div class="t-body">
+                                <div class="t-col"></div>
+                                <div class="t-side"></div>
+                            </div>
+                        </div>
+                        <span>Minimal</span>
+                    </div>
+                    <div class="tpl" data-t="elegant">
+                        <div class="thumb">
+                            <div class="t-head"></div>
+                            <div class="t-body">
+                                <div class="t-col"></div>
+                                <div class="t-side"></div>
+                            </div>
+                        </div>
+                        <span>Elegant</span>
+                    </div>
+                    <div class="tpl" data-t="bold">
+                        <div class="thumb">
+                            <div class="t-head"></div>
+                            <div class="t-body">
+                                <div class="t-col"></div>
+                                <div class="t-side"></div>
+                            </div>
+                        </div>
+                        <span>Bold</span>
+                    </div>
+                    <div class="tpl" data-t="slate">
+                        <div class="thumb">
+                            <div class="t-head"></div>
+                            <div class="t-body">
+                                <div class="t-col"></div>
+                                <div class="t-side"></div>
+                            </div>
+                        </div>
+                        <span>Slate</span>
+                    </div>
+                    <div class="tpl" data-t="sidebar">
+                        <div class="thumb">
+                            <div class="t-head"></div>
+                            <div class="t-body">
+                                <div class="t-col"></div>
+                                <div class="t-side"></div>
+                            </div>
+                        </div>
+                        <span>Sidebar</span>
+                    </div>
+                    <div class="tpl" data-t="timeline">
+                        <div class="thumb">
+                            <div class="t-head"></div>
+                            <div class="t-body">
+                                <div class="t-col"></div>
+                                <div class="t-side"></div>
+                            </div>
+                        </div>
+                        <span>Timeline</span>
+                    </div>
+                    <div class="tpl" data-t="mono">
+                        <div class="thumb">
+                            <div class="t-head"></div>
+                            <div class="t-body">
+                                <div class="t-col"></div>
+                                <div class="t-side"></div>
+                            </div>
+                        </div>
+                        <span>Mono</span>
+                    </div>
+                    <div class="tpl" data-t="onyx">
+                        <div class="thumb">
+                            <div class="t-head"></div>
+                            <div class="t-body">
+                                <div class="t-col"></div>
+                                <div class="t-side"></div>
+                            </div>
+                        </div>
+                        <span>Onyx</span>
+                    </div>
+                </div>
+                <div class="accent-dots" id="accent-dots">
+                    <span class="lbl">+ recolor instantly</span>
+                    <i class="active" style="background: #c4622d"></i>
+                    <i style="background: #b23b4a"></i>
+                    <i style="background: #2f6f8f"></i>
+                    <i style="background: #3f7d58"></i>
+                    <i style="background: #5b53a6"></i>
+                    <i style="background: #1f8a8a"></i>
+                    <i style="background: #3a3a3a"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- FLOW -->
+        <section class="block" id="flow" style="background: var(--bg-2)">
+            <div class="wrap">
+                <div class="flow-grid">
+                    <div class="flow-copy">
+                        <div class="sec-tag">Flow — Budget Planner</div>
+                        <h2>Map your money.<br><em>Build toward what matters.</em></h2>
+                        <p class="lead">
+                            Know exactly where your income goes every month — taxes, expenses, savings. Set goals with real timelines and watch the gap close.
+                        </p>
+                        <ul class="flow-list">
+                            <li>Income calculator with overtime &amp; tax</li>
+                            <li>Expense tracking by frequency (monthly, biweekly, yearly)</li>
+                            <li>Savings goals with months-to-target countdown</li>
+                            <li>1-year and 5-year projection for every account</li>
+                            <li>Cash flow breakdown — monthly, biweekly, yearly</li>
+                        </ul>
+                        <a class="btn btn-primary" href="budget.html">Plan my budget →</a>
+                    </div>
+                    <div style="transition-delay:0.1s">
+                        <div class="fp-card">
+                            <div class="fp-meta">
+                                <span class="fp-dot healthy"></span>
+                                Monthly picture · July 2026
+                            </div>
+                            <div class="fp-numbers">
+                                <div class="fp-num">
+                                    <div class="fp-label">Net income</div>
+                                    <div class="fp-value income">$3,965</div>
+                                    <div class="fp-sub">$5,217 gross</div>
+                                </div>
+                                <div class="fp-divider"></div>
+                                <div class="fp-num">
+                                    <div class="fp-label">Committed</div>
+                                    <div class="fp-value">$2,819</div>
+                                    <div class="fp-sub">71% of net</div>
+                                </div>
+                                <div class="fp-divider"></div>
+                                <div class="fp-num">
+                                    <div class="fp-label">Remaining</div>
+                                    <div class="fp-value healthy">$1,146</div>
+                                    <div class="fp-sub">manageable</div>
+                                </div>
+                            </div>
+                            <div class="fp-bar-wrap">
+                                <div class="fp-bar-seg fp-tax"      style="width:31%"></div>
+                                <div class="fp-bar-seg fp-expenses"  style="left:31%;width:34%"></div>
+                                <div class="fp-bar-seg fp-savings"   style="left:65%;width:7%"></div>
+                            </div>
+                            <div class="fp-legend">
+                                <span><i style="background:rgba(184,90,69,.7)"></i>Taxes</span>
+                                <span><i style="background:rgba(196,98,45,.65)"></i>Expenses</span>
+                                <span><i style="background:rgba(196,150,45,.75)"></i>Savings</span>
+                                <span><i style="background:var(--bg-3);border:1px solid var(--border)"></i>Free</span>
+                            </div>
+                            <div class="fp-goals">
+                                <div class="fp-goal-row">
+                                    <span class="fp-goal-name">Emergency Fund</span>
+                                    <span class="fp-goal-timeline">2y 9m away</span>
+                                </div>
+                                <div class="fp-goal-bar"><div class="fp-goal-fill" style="width:13%"></div></div>
+                                <div class="fp-goal-row">
+                                    <span class="fp-goal-name">Down Payment</span>
+                                    <span class="fp-goal-timeline">8y 4m away</span>
+                                </div>
+                                <div class="fp-goal-bar"><div class="fp-goal-fill" style="width:21%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section class="block" id="features">
+            <div class="wrap">
+                <div class="sec-head">
+                    <div class="sec-tag">Features</div>
+                    <h2>Everything you need. Nothing you don't.</h2>
+                    <p>
+                        Two tools built to work the way you actually work — fast, private, and right in your browser.
+                    </p>
+                </div>
+                <div class="feat-grid">
+                    <div class="feat">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"
+                                />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </div>
+                        <h3>Live preview</h3>
+                        <p>
+                            Watch your résumé update as you type — what you see
+                            is exactly what prints.
+                        </p>
+                    </div>
+                    <div class="feat">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M6 3h8l4 4v14H6Z" />
+                                <path d="M14 3v4h4" />
+                                <path d="m9 14 2 2 4-4" />
+                            </svg>
+                        </div>
+                        <h3>One-page fit meter</h3>
+                        <p>
+                            A live gauge tells you when your content fits, with a
+                            density slider to tighten it up.
+                        </p>
+                    </div>
+                    <div class="feat">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <path d="M3 9h18M9 9v12" />
+                            </svg>
+                        </div>
+                        <h3>Templates &amp; colors</h3>
+                        <p>
+                            Ten distinct templates, seven accent colors, and a
+                            serif / sans toggle.
+                        </p>
+                    </div>
+                    <div class="feat">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="5" width="18" height="14" rx="2" />
+                                <path d="m3 7 9 6 9-6" />
+                            </svg>
+                        </div>
+                        <h3>Cover letter</h3>
+                        <p>
+                            Write a matching cover letter that exports right
+                            alongside your résumé.
+                        </p>
+                    </div>
+                    <div class="feat">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 3v12" />
+                                <path d="m7 10 5 5 5-5" />
+                                <path d="M5 21h14" />
+                            </svg>
+                        </div>
+                        <h3>Autosave &amp; backups</h3>
+                        <p>
+                            Saves to your browser as you work. Export your data
+                            to a file anytime.
+                        </p>
+                    </div>
+                    <div class="feat">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="4" y="10" width="16" height="11" rx="2" />
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                            </svg>
+                        </div>
+                        <h3>Totally private</h3>
+                        <p>
+                            No accounts, no servers, no tracking. Your data never
+                            leaves your device.
+                        </p>
+                    </div>
+                    <div class="feat">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                            </svg>
+                        </div>
+                        <h3>Cash flow breakdown</h3>
+                        <p>
+                            See your net income, taxes, expenses, and savings across monthly, biweekly, and yearly views — instantly.
+                        </p>
+                    </div>
+                    <div class="feat">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                            </svg>
+                        </div>
+                        <h3>Goal timelines</h3>
+                        <p>
+                            Set a target amount for any savings goal — Flow tells you exactly how many months until you get there.
+                        </p>
+                    </div>
+                    <div class="feat">
+                        <div class="ico">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <h3>Overtime + tax calc</h3>
+                        <p>
+                            Enter wage, hours, and tax rate — Flow handles the math including 1.5× overtime and gives you your real take-home.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section class="block" id="how">
+            <div class="wrap">
+                <div class="sec-head">
+                    <div class="sec-tag">How it works</div>
+                    <h2>Two tools. One place.</h2>
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="num">1</div>
+                        <h3>Build your résumé</h3>
+                        <p>
+                            Fill in your details, pick a template and accent, and
+                            export a crisp PDF ready for any employer.
+                        </p>
+                    </div>
+                    <div class="step">
+                        <div class="num">2</div>
+                        <h3>Map your money</h3>
+                        <p>
+                            Enter your wage and expenses in Flow — see your real
+                            take-home, allocate savings, and track every goal.
+                        </p>
+                    </div>
+                    <div class="step">
+                        <div class="num">3</div>
+                        <h3>Nothing leaves your device</h3>
+                        <p>
+                            No sign-up, no servers, no tracking. Both tools run
+                            entirely in your browser and save to local storage.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FINAL CTA -->
+        <section class="final">
+            <div class="wrap">
+                <h2>Build the career.<br>Plan the life.</h2>
+                <p>Free, private, and ready when you are.</p>
+                <div class="final-cta-row">
+                    <a class="btn btn-primary" href="app.html" id="cta-final">Build my résumé →</a>
+                    <a class="btn btn-outline" href="budget.html">Plan my budget →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="wrap foot-inner">
+                <a class="brand" href="index.html">Folio</a>
+                <span>Runs entirely in your browser · No account · Free</span>
+            </div>
+        </footer>
+
+        <script>
+            // Returning visitors: nudge them straight back into their work.
+            try {
+                if (localStorage.getItem("resume_builder_save")) {
+                    const label = "Continue your résumé →";
+                    const m = document.getElementById("cta-main");
+                    const f = document.getElementById("cta-final");
+                    if (m) m.textContent = label;
+                    if (f) f.textContent = label;
+                    const note = document.getElementById("cta-note");
+                    if (note)
+                        note.textContent =
+                            "Welcome back — we saved your last session.";
+                }
+            } catch (e) {}
+
+            // Mobile nav toggle
+            const navEl = document.getElementById("site-nav");
+            const navToggle = document.getElementById("nav-toggle");
+            if (navEl && navToggle) {
+                navToggle.addEventListener("click", () => {
+                    const open = navEl.classList.toggle("open");
+                    navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+                });
+                navEl.querySelectorAll(".nav-pill a, .nav-links a").forEach((a) => {
+                    a.addEventListener("click", () => {
+                        navEl.classList.remove("open");
+                        navToggle.setAttribute("aria-expanded", "false");
+                    });
+                });
+            }
+
+            // Hero demo: click a swatch to retheme the live document mock
+            const tcNames = {
+                classic: "Classic",
+                modern: "Modern",
+                bold: "Bold",
+                elegant: "Elegant",
+                onyx: "Onyx",
+            };
+            const tcPaper = document.getElementById("tc-paper");
+            const tcSpec = document.getElementById("tc-spec");
+            const tcSwatches = document.querySelectorAll(".tc-swatch");
+            tcSwatches.forEach((sw) => {
+                sw.addEventListener("click", () => {
+                    tcSwatches.forEach((s) => s.classList.remove("active"));
+                    sw.classList.add("active");
+                    const t = sw.dataset.tpl;
+                    if (tcPaper) {
+                        tcPaper.dataset.t = t;
+                        tcPaper.style.setProperty("--tc-c", sw.dataset.c);
+                    }
+                    if (tcSpec)
+                        tcSpec.innerHTML = `<b>${tcNames[t] || t}</b> · Source Serif 4`;
+                });
+            });
+
+            // Templates section: click a dot to recolor the whole grid
+            const tplGrid = document.querySelector(".tpl-grid");
+            const accentDots = document.querySelectorAll("#accent-dots i");
+            accentDots.forEach((dot) => {
+                dot.addEventListener("click", () => {
+                    accentDots.forEach((d) => d.classList.remove("active"));
+                    dot.classList.add("active");
+                    if (tplGrid)
+                        tplGrid.style.setProperty(
+                            "--tpl-accent",
+                            dot.style.backgroundColor,
+                        );
+                });
+            });
+
+            // Nav scroll → fade in frosted bar
+            const navEl2 = document.getElementById("site-nav");
+            const onScroll = () => navEl2.classList.toggle("scrolled", window.scrollY > 40);
+            window.addEventListener("scroll", onScroll, { passive: true });
+            onScroll();
+
+            // Nav scroll-spy: highlight the pill link for the section in view
+            const navLinkMap = {};
+            document.querySelectorAll('#nav-pill a[href^="#"]').forEach((a) => {
+                navLinkMap[a.getAttribute("href").slice(1)] = a;
+            });
+            const spySections = Object.keys(navLinkMap)
+                .map((id) => document.getElementById(id))
+                .filter(Boolean);
+            if ("IntersectionObserver" in window && spySections.length) {
+                const spy = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((entry) => {
+                            if (!entry.isIntersecting) return;
+                            const link = navLinkMap[entry.target.id];
+                            if (!link) return;
+                            Object.values(navLinkMap).forEach((a) =>
+                                a.classList.remove("active"),
+                            );
+                            link.classList.add("active");
+                        });
+                    },
+                    { rootMargin: "-45% 0px -50% 0px", threshold: 0 },
+                );
+                spySections.forEach((s) => spy.observe(s));
+            }
+
+            // Scroll-reveal for below-the-fold sections
+            const revealTargets = document.querySelectorAll(
+                ".strip, .tpl, .feat, .step, .final h2, .final p, .final .btn, .flow-copy, .fp-card",
+            );
+            if ("IntersectionObserver" in window && revealTargets.length) {
+                revealTargets.forEach((el) => el.classList.add("reveal-on-scroll"));
+                const io = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add("revealed");
+                                io.unobserve(entry.target);
+                            }
+                        });
+                    },
+                    { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
+                );
+                revealTargets.forEach((el) => io.observe(el));
+            }
+        </script>
+    </body>
+</html>

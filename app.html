@@ -1,0 +1,1772 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Resume Studio · Folio</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="toast" id="toast"></div>
+        <input
+            type="file"
+            id="import-file"
+            accept="application/json"
+            style="display: none"
+            onchange="handleImportFile(event)"
+        />
+
+        <header class="topbar">
+            <a class="logo" href="index.html" title="Back to home">
+                <span class="app-brand-mark">R</span>
+                Resume Studio
+            </a>
+            <div class="app-nav-pill">
+                <button class="doc-tab active" onclick="switchDoc('resume')" title="Switch to Resume (Alt+1)">Resume</button>
+                <button class="doc-tab" onclick="switchDoc('coverletter')" title="Switch to Cover Letter (Alt+2)">Cover Letter</button>
+                <span class="pill-sep" aria-hidden="true">|</span>
+                <a class="pill-link" href="budget.html">Budget Studio</a>
+            </div>
+            <div class="topbar-right">
+                <div class="strength-meter" id="strength-meter" title="Resume strength">
+                    <svg class="strength-ring" viewBox="0 0 36 36" aria-hidden="true">
+                        <circle class="strength-track" cx="18" cy="18" r="15.5"></circle>
+                        <circle class="strength-fill" id="strength-fill" cx="18" cy="18" r="15.5"></circle>
+                    </svg>
+                    <span class="strength-pct" id="strength-pct">0%</span>
+                </div>
+                <span class="save-status" id="save-status">
+                    <span class="save-dot"></span>
+                    <span id="save-text">Saved</span>
+                </span>
+                <button
+                    class="btn"
+                    onclick="exportJSON()"
+                    title="Download your data as a file"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+                        <path d="M12 3v12m0 0 4-4m-4 4-4-4" />
+                    </svg>
+                    <span class="btn-label">Export Data</span>
+                </button>
+                <button
+                    class="btn btn-primary"
+                    onclick="window.print()"
+                    title="Export PDF (Ctrl/Cmd+P)"
+                >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 9V3h12v6" />
+                        <path d="M6 18H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1" />
+                        <rect x="7" y="15" width="10" height="6" rx="1" />
+                    </svg>
+                    <span class="btn-label">Export PDF</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="mobile-view-toggle" id="mobile-view-toggle">
+            <button class="mv-btn active" data-view="editor" onclick="setMobileView('editor')">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
+                Edit
+            </button>
+            <button class="mv-btn" data-view="preview" onclick="setMobileView('preview')">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+                Preview
+            </button>
+        </div>
+
+        <div class="main">
+            <!-- ── EDITOR ── -->
+            <div class="editor-side">
+                <!-- RESUME EDITOR -->
+                <div id="editor-resume" class="editor-panel active">
+                    <div class="section-tabs" id="resume-section-tabs">
+                        <button
+                            class="section-tab active"
+                            onclick="switchTab('info')"
+                            data-tab="info"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="8" r="4" />
+                                <path d="M4 20a8 8 0 0 1 16 0" />
+                            </svg>
+                            Info
+                        </button>
+                        <button
+                            class="section-tab"
+                            onclick="switchTab('exp')"
+                            data-tab="exp"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="7" width="18" height="13" rx="2" />
+                                <path
+                                    d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"
+                                />
+                            </svg>
+                            Experience
+                            <span class="tab-count" id="tc-exp"></span>
+                        </button>
+                        <button
+                            class="section-tab"
+                            onclick="switchTab('edu')"
+                            data-tab="edu"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 5 2 9l10 4 10-4-10-4Z" />
+                                <path d="M6 11v5c0 1 2.7 3 6 3s6-2 6-3v-5" />
+                            </svg>
+                            Education
+                            <span class="tab-count" id="tc-edu"></span>
+                        </button>
+                        <button
+                            class="section-tab"
+                            onclick="switchTab('skills')"
+                            data-tab="skills"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="m12 3 2.1 5.8L20 11l-5.9 2.2L12 19l-2.1-5.8L4 11l5.9-2.2L12 3Z"
+                                />
+                            </svg>
+                            Skills
+                            <span class="tab-count" id="tc-skills"></span>
+                        </button>
+                        <button
+                            class="section-tab"
+                            onclick="switchTab('certs')"
+                            data-tab="certs"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="9" r="6" />
+                                <path d="m9 14-1.5 7L12 18l4.5 3L15 14" />
+                            </svg>
+                            Certs
+                            <span class="tab-count" id="tc-certs"></span>
+                        </button>
+                        <button
+                            class="section-tab tab-design"
+                            onclick="switchTab('design')"
+                            data-tab="design"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <path d="M3 9h18M9 9v12" />
+                            </svg>
+                            Design
+                        </button>
+                    </div>
+                    <div class="tab-scrollbar" id="tab-scrollbar">
+                        <div class="tab-scrollbar-track" id="tab-scrollbar-track">
+                            <div class="tab-scrollbar-thumb" id="tab-scrollbar-thumb"></div>
+                        </div>
+                    </div>
+                    <div class="editor-scroll" id="editor-scroll">
+                        <!-- INFO -->
+                        <div class="editor-panel active" id="tab-info">
+                            <div class="field">
+                                <label>Full Name</label
+                                ><input
+                                    id="r-name"
+                                    value="Alex Morgan"
+                                    oninput="renderResume()"
+                                />
+                            </div>
+                            <div class="field">
+                                <label>Headline / Role</label
+                                ><input
+                                    id="r-headline"
+                                    value=""
+                                    placeholder="e.g. Marketing Coordinator · Project Management"
+                                    oninput="renderResume()"
+                                />
+                            </div>
+                            <div class="grid-2">
+                                <div class="field">
+                                    <label>Phone</label
+                                    ><input
+                                        id="r-phone"
+                                        value="(555) 123-4567"
+                                        oninput="renderResume()"
+                                    />
+                                </div>
+                                <div class="field">
+                                    <label>Email</label
+                                    ><input
+                                        id="r-email"
+                                        value="alex.morgan@email.com"
+                                        oninput="renderResume()"
+                                    />
+                                </div>
+                            </div>
+                            <div class="grid-2">
+                                <div class="field">
+                                    <label>City</label
+                                    ><input
+                                        id="r-city"
+                                        value="Toronto"
+                                        oninput="renderResume()"
+                                    />
+                                </div>
+                                <div class="field">
+                                    <label>Province &amp; Postal</label
+                                    ><input
+                                        id="r-locrest"
+                                        value="ON  M5V 2T6"
+                                        oninput="renderResume()"
+                                    />
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label>LinkedIn / Portfolio</label
+                                ><input
+                                    id="r-link"
+                                    value=""
+                                    placeholder="linkedin.com/in/yourname"
+                                    oninput="renderResume()"
+                                />
+                            </div>
+                            <div class="divider"></div>
+                            <div class="field">
+                                <label
+                                    >Professional Summary
+                                    <span class="label-hint"
+                                        >2–3 lines</span
+                                    ></label
+                                ><textarea
+                                    id="r-summary"
+                                    class="tall"
+                                    placeholder="A short, punchy paragraph about who you are and the value you bring. Hiring managers read this first."
+                                    oninput="renderResume()"
+                                >
+Motivated professional with experience across marketing coordination, administrative support, and customer service. Known for strong organizational skills, clear communication, and a collaborative approach to hitting team goals.</textarea
+                                >
+                            </div>
+                        </div>
+
+                        <!-- EXPERIENCE -->
+                        <div class="editor-panel" id="tab-exp">
+                            <div id="exp-list"></div>
+                            <button class="add-entry-btn" onclick="addJob()">
+                                + Add position
+                            </button>
+                        </div>
+
+                        <!-- EDUCATION -->
+                        <div class="editor-panel" id="tab-edu">
+                            <div id="edu-list"></div>
+                            <button class="add-entry-btn" onclick="addEdu()">
+                                + Add education
+                            </button>
+                        </div>
+
+                        <!-- SKILLS -->
+                        <div class="editor-panel" id="tab-skills">
+                            <div id="skill-groups"></div>
+                            <button
+                                class="add-entry-btn"
+                                onclick="addSkillGroup()"
+                                style="margin-top: 8px"
+                            >
+                                + Add category
+                            </button>
+                        </div>
+
+                        <!-- CERTS -->
+                        <div class="editor-panel" id="tab-certs">
+                            <div id="cert-list"></div>
+                            <button
+                                class="add-entry-btn"
+                                onclick="addCert()"
+                                style="margin-top: 4px"
+                            >
+                                + Add certification
+                            </button>
+                        </div>
+
+                        <!-- DESIGN -->
+                        <div class="editor-panel" id="tab-design">
+                            <div class="design-group">
+                                <div class="design-label">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <rect
+                                            x="3"
+                                            y="4"
+                                            width="18"
+                                            height="16"
+                                            rx="2"
+                                        />
+                                        <path d="M3 9h18M9 9v11" />
+                                    </svg>
+                                    Template
+                                </div>
+                                <div class="theme-grid" id="theme-grid"></div>
+                            </div>
+                            <div class="design-group">
+                                <div class="design-label">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path
+                                            d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11Z"
+                                        />
+                                    </svg>
+                                    Accent color
+                                </div>
+                                <div class="swatch-row" id="swatch-row"></div>
+                            </div>
+                            <div class="design-group">
+                                <div class="design-label">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M5 6h14M12 6v13M9 19h6" />
+                                    </svg>
+                                    Typeface
+                                </div>
+                                <div class="seg" id="font-seg">
+                                    <button
+                                        data-font="sans"
+                                        onclick="setFont('sans')"
+                                    >
+                                        Sans
+                                    </button>
+                                    <button
+                                        data-font="serif"
+                                        onclick="setFont('serif')"
+                                    >
+                                        Serif
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="design-group">
+                                <div class="design-label">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <rect
+                                            x="5"
+                                            y="3"
+                                            width="14"
+                                            height="18"
+                                            rx="2"
+                                        />
+                                        <path d="M9 8h6M9 12h6M9 16h4" />
+                                    </svg>
+                                    Page size
+                                </div>
+                                <div class="seg" id="page-seg">
+                                    <button
+                                        data-page="letter"
+                                        onclick="setPageSize('letter')"
+                                    >
+                                        Letter
+                                    </button>
+                                    <button
+                                        data-page="a4"
+                                        onclick="setPageSize('a4')"
+                                    >
+                                        A4
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="design-group">
+                                <div class="design-label">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                    Density
+                                    <span class="label-hint"
+                                        >squeeze to one page</span
+                                    >
+                                </div>
+                                <div class="seg" id="density-seg">
+                                    <button
+                                        data-density="compact"
+                                        onclick="setDensity('compact')"
+                                    >
+                                        Compact
+                                    </button>
+                                    <button
+                                        data-density="cozy"
+                                        onclick="setDensity('cozy')"
+                                    >
+                                        Cozy
+                                    </button>
+                                    <button
+                                        data-density="roomy"
+                                        onclick="setDensity('roomy')"
+                                    >
+                                        Roomy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="design-group">
+                                <div class="design-label">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M12 3v10m0 0 4-4m-4 4-4-4" />
+                                        <path
+                                            d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"
+                                        />
+                                    </svg>
+                                    Your data
+                                </div>
+                                <div class="data-actions">
+                                    <button
+                                        class="data-btn"
+                                        onclick="exportJSON()"
+                                    >
+                                        ↓ Export to file
+                                    </button>
+                                    <button
+                                        class="data-btn"
+                                        onclick="document.getElementById('import-file').click()"
+                                    >
+                                        ↑ Import from file
+                                    </button>
+                                    <button
+                                        class="data-btn danger"
+                                        onclick="resetAll()"
+                                    >
+                                        ⟲ Reset everything
+                                    </button>
+                                </div>
+                                <p class="design-note">
+                                    Everything you type is saved automatically
+                                    in this browser. Export a file to keep a
+                                    backup or move between devices.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /editor-scroll -->
+                </div>
+                <!-- /editor-resume -->
+
+                <!-- COVER LETTER EDITOR -->
+                <div id="editor-coverletter" class="editor-panel">
+                    <div class="section-tabs no-scrollbar">
+                        <button
+                            class="section-tab active"
+                            style="pointer-events: none"
+                        >
+                            Cover Letter
+                        </button>
+                    </div>
+                    <div class="editor-scroll">
+                        <div class="field">
+                            <label>Hiring Manager</label
+                            ><input
+                                id="cl-manager"
+                                value="Hiring Manager"
+                                oninput="renderCL()"
+                            />
+                        </div>
+                        <div class="grid-2">
+                            <div class="field">
+                                <label>Company</label
+                                ><input
+                                    id="cl-company"
+                                    value="Company Name"
+                                    oninput="renderCL()"
+                                />
+                            </div>
+                            <div class="field">
+                                <label>Position</label
+                                ><input
+                                    id="cl-position"
+                                    value="Marketing Coordinator"
+                                    placeholder="Role you're applying for"
+                                    oninput="renderCL()"
+                                />
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Address (optional)</label
+                            ><input
+                                id="cl-addr"
+                                value=""
+                                placeholder="123 Main St, Toronto, ON"
+                                oninput="renderCL()"
+                            />
+                        </div>
+                        <div class="divider"></div>
+                        <div class="field">
+                            <label>Opening</label
+                            ><textarea
+                                id="cl-opening"
+                                class="tall"
+                                oninput="renderCL()"
+                            >
+I am writing to express my interest in the open position. With hands-on experience in marketing coordination, administrative support, and customer service, I am confident I can bring strong organizational skills and a collaborative approach to your team.</textarea
+                            >
+                        </div>
+                        <div class="field">
+                            <label>Body</label
+                            ><textarea
+                                id="cl-body"
+                                class="taller"
+                                oninput="renderCL()"
+                            >
+In my current role as a Marketing Coordinator at Northbridge Media, I have developed strong skills in campaign management, content coordination, and cross-team collaboration. Prior to this, I worked as an Administrative Assistant at Clearview Consulting, where I managed scheduling, reporting, and day-to-day office operations for a busy team.
+
+At Summit Retail Group, I gained valuable experience in customer service and problem-solving, resolving inquiries and building strong client relationships in a fast-paced environment. These experiences have shaped a reliable, detail-oriented approach to professional work.
+
+I hold a Bachelor of Business Administration and a Google Analytics certification.</textarea
+                            >
+                        </div>
+                        <div class="field">
+                            <label>Closing</label
+                            ><textarea
+                                id="cl-closing"
+                                class="tall"
+                                oninput="renderCL()"
+                            >
+I would welcome the opportunity to discuss how my background fits your needs. Thank you for taking the time to consider my application — I look forward to hearing from you.</textarea
+                            >
+                        </div>
+                        <div class="grid-2">
+                            <div class="field">
+                                <label>Valediction</label
+                                ><input
+                                    id="cl-val"
+                                    value="Sincerely"
+                                    oninput="renderCL()"
+                                />
+                            </div>
+                            <div class="field">
+                                <label>Date</label
+                                ><input
+                                    id="cl-date"
+                                    value=""
+                                    placeholder="May 2026"
+                                    oninput="renderCL()"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /editor-side -->
+
+            <!-- ── PREVIEW ── -->
+            <div class="preview-side">
+                <div class="doc-view active" id="view-resume">
+                    <div class="preview-bar">
+                        <span class="preview-tag">resume · live preview</span>
+                        <span class="preview-bar-right">
+                            <span class="preview-meta" id="resume-meta"></span>
+                            <span class="fit-meter" id="fit-meter"></span>
+                        </span>
+                    </div>
+                    <div class="page-stage" id="resume-stage">
+                        <div class="doc-page-wrap doc" id="rp"></div>
+                        <div class="page-edge" id="page-edge">
+                            <span>page 2</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doc-view" id="view-coverletter">
+                    <div class="preview-bar">
+                        <span class="preview-tag"
+                            >cover letter · live preview</span
+                        >
+                    </div>
+                    <div class="doc-page-wrap cl-page doc" id="clp"></div>
+                </div>
+            </div>
+        </div>
+        <!-- /main -->
+
+        <!-- PRINT LAYER: cover letter first, resume second, always separate pages -->
+        <div id="print-layer">
+            <div class="print-doc cl-page doc" id="print-cl"></div>
+            <div class="print-doc doc" id="print-rp"></div>
+        </div>
+
+        <script>
+            /* ── DATA ── */
+            const jobs = [
+                {
+                    title: "Marketing Coordinator",
+                    org: "Northbridge Media",
+                    loc: "Toronto, ON",
+                    date: "Jan 2024 – Present",
+                    bullets:
+                        "Coordinated multi-channel marketing campaigns from planning through execution, contributing to a 20% increase in engagement.\nManaged the social media content calendar and collaborated with the design team to produce on-brand assets.\nTracked campaign performance using analytics tools and presented findings to stakeholders.",
+                },
+                {
+                    title: "Administrative Assistant",
+                    org: "Clearview Consulting",
+                    loc: "Toronto, ON",
+                    date: "Jun 2022 – Dec 2023",
+                    bullets:
+                        "Managed scheduling, correspondence, and file organization for a team of 12 consultants.\nPrepared reports and presentations using Microsoft Office Suite for client meetings.\nStreamlined office procedures, reducing document processing time by 15%.",
+                },
+                {
+                    title: "Customer Support Specialist",
+                    org: "Summit Retail Group",
+                    loc: "Toronto, ON",
+                    date: "Summer 2021",
+                    bullets:
+                        "Resolved customer inquiries and issues via phone and email, maintaining a high satisfaction rating.\nProcessed orders and returns accurately in a fast-paced retail environment.\nTrained new team members on store systems and customer service standards.",
+                },
+            ];
+
+            const skillGroups = [
+                {
+                    heading: "Hard Skills",
+                    skills: [
+                        "Project Management",
+                        "Microsoft Office Suite",
+                        "Data Analysis",
+                        "Social Media Management",
+                        "CRM Software",
+                    ],
+                },
+                {
+                    heading: "Soft Skills",
+                    skills: [
+                        "Communication",
+                        "Problem Solving",
+                        "Team Collaboration",
+                        "Time Management",
+                        "Adaptability",
+                    ],
+                },
+            ];
+
+            const certs = [
+                "Google Analytics Certified",
+                "Project Management Fundamentals",
+                "First Aid & CPR",
+            ];
+
+            const eduList = [
+                {
+                    school: "University of Toronto",
+                    degree: "Bachelor of Business Administration",
+                    date: "Graduated 2022",
+                    loc: "Toronto, ON",
+                },
+            ];
+
+            /* ── DESIGN STATE ── */
+            const THEMES = [
+                { id: "classic", name: "Classic" },
+                { id: "modern", name: "Modern" },
+                { id: "minimal", name: "Minimal" },
+                { id: "elegant", name: "Elegant" },
+                { id: "bold", name: "Bold" },
+                { id: "slate", name: "Slate" },
+                { id: "sidebar", name: "Sidebar" },
+                { id: "timeline", name: "Timeline" },
+                { id: "mono", name: "Mono" },
+                { id: "onyx", name: "Onyx" },
+            ];
+            const ACCENTS = [
+                "#c4622d",
+                "#b23b4a",
+                "#2f6f8f",
+                "#3f7d58",
+                "#5b53a6",
+                "#1f8a8a",
+                "#3a3a3a",
+            ];
+            const design = {
+                theme: "classic",
+                accent: "#c4622d",
+                font: "sans",
+                pageSize: "letter",
+                density: "cozy",
+            };
+            const PAGE_RATIO = { letter: 11 / 8.5, a4: 297 / 210 };
+
+            /* ── TOAST ── */
+            function toast(msg, action) {
+                const el = document.getElementById("toast");
+                el.innerHTML = "";
+                const span = document.createElement("span");
+                span.textContent = msg;
+                el.appendChild(span);
+                if (action) {
+                    const b = document.createElement("button");
+                    b.className = "toast-action";
+                    b.textContent = action.label;
+                    b.onclick = () => {
+                        el.classList.remove("show");
+                        action.fn();
+                    };
+                    el.appendChild(b);
+                }
+                el.classList.add("show");
+                clearTimeout(el._t);
+                el._t = setTimeout(
+                    () => el.classList.remove("show"),
+                    action ? 4500 : 1800,
+                );
+            }
+
+            /* ── SAVE STATUS ── */
+            function setSaveStatus(state) {
+                const wrap = document.getElementById("save-status");
+                const txt = document.getElementById("save-text");
+                if (state === "saving") {
+                    wrap.classList.add("saving");
+                    txt.textContent = "Saving…";
+                } else {
+                    wrap.classList.remove("saving");
+                    txt.textContent = "Saved";
+                }
+            }
+
+            /* ── KEYBOARD SHORTCUTS ── */
+            document.addEventListener("keydown", (e) => {
+                const mod = e.ctrlKey || e.metaKey;
+                if (mod && e.key === "s") {
+                    e.preventDefault();
+                    saveSnapshot();
+                    toast("saved ✓");
+                }
+                if (mod && e.key === "p") {
+                    e.preventDefault();
+                    window.print();
+                }
+                if (e.altKey && e.key === "1") {
+                    e.preventDefault();
+                    switchDocByName("resume");
+                }
+                if (e.altKey && e.key === "2") {
+                    e.preventDefault();
+                    switchDocByName("coverletter");
+                }
+                if (e.altKey && e.key === "ArrowRight") {
+                    e.preventDefault();
+                    nextTab();
+                }
+                if (e.altKey && e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    prevTab();
+                }
+            });
+
+            /* ── AUTOSAVE ── */
+            let _saveTimer = null;
+            function scheduleSave() {
+                setSaveStatus("saving");
+                clearTimeout(_saveTimer);
+                _saveTimer = setTimeout(() => {
+                    saveSnapshot();
+                    setSaveStatus("saved");
+                }, 600);
+            }
+
+            /* ── SNAPSHOT ── */
+            function collectData() {
+                return {
+                    version: 2,
+                    design: { ...design },
+                    info: {
+                        name: v("r-name"),
+                        headline: v("r-headline"),
+                        phone: v("r-phone"),
+                        email: v("r-email"),
+                        city: v("r-city"),
+                        locrest: v("r-locrest"),
+                        link: v("r-link"),
+                        summary: v("r-summary"),
+                    },
+                    eduList: JSON.parse(JSON.stringify(eduList)),
+                    jobs: JSON.parse(JSON.stringify(jobs)),
+                    skillGroups: JSON.parse(JSON.stringify(skillGroups)),
+                    certs: [...certs],
+                    cl: {
+                        manager: v("cl-manager"),
+                        company: v("cl-company"),
+                        position: v("cl-position"),
+                        addr: v("cl-addr"),
+                        opening: v("cl-opening"),
+                        body: v("cl-body"),
+                        closing: v("cl-closing"),
+                        val: v("cl-val"),
+                        date: v("cl-date"),
+                    },
+                };
+            }
+
+            function saveSnapshot() {
+                localStorage.setItem(
+                    "resume_builder_save",
+                    JSON.stringify(collectData()),
+                );
+            }
+
+            function applyData(d) {
+                if (d.design) {
+                    if (d.design.theme) design.theme = d.design.theme;
+                    if (d.design.accent) design.accent = d.design.accent;
+                    if (d.design.font) design.font = d.design.font;
+                    if (d.design.pageSize) design.pageSize = d.design.pageSize;
+                    if (d.design.density) design.density = d.design.density;
+                }
+                if (d.info) {
+                    setVal("r-name", d.info.name);
+                    setVal("r-headline", d.info.headline);
+                    setVal("r-phone", d.info.phone);
+                    setVal("r-email", d.info.email);
+                    setVal("r-city", d.info.city);
+                    setVal("r-locrest", d.info.locrest);
+                    setVal("r-link", d.info.link);
+                    setVal("r-summary", d.info.summary);
+                }
+                if (d.eduList) {
+                    eduList.length = 0;
+                    d.eduList.forEach((e) => eduList.push(e));
+                } else if (d.edu) {
+                    // backward-compat with the old single-entry format
+                    eduList.length = 0;
+                    eduList.push({
+                        school: d.edu.school,
+                        degree: d.edu.degree,
+                        date: d.edu.eduDate,
+                        loc: d.edu.eduLoc,
+                    });
+                }
+                if (d.jobs) {
+                    jobs.length = 0;
+                    d.jobs.forEach((j) => jobs.push(j));
+                }
+                if (d.skillGroups) {
+                    skillGroups.length = 0;
+                    d.skillGroups.forEach((g) => skillGroups.push(g));
+                }
+                if (d.certs) {
+                    certs.length = 0;
+                    d.certs.forEach((c) => certs.push(c));
+                }
+                if (d.cl) {
+                    setVal("cl-manager", d.cl.manager);
+                    setVal("cl-company", d.cl.company);
+                    setVal("cl-position", d.cl.position);
+                    setVal("cl-addr", d.cl.addr);
+                    setVal("cl-opening", d.cl.opening);
+                    setVal("cl-body", d.cl.body);
+                    setVal("cl-closing", d.cl.closing);
+                    setVal("cl-val", d.cl.val);
+                    setVal("cl-date", d.cl.date);
+                }
+            }
+
+            function loadSnapshot() {
+                try {
+                    const raw = localStorage.getItem("resume_builder_save");
+                    if (!raw) return;
+                    applyData(JSON.parse(raw));
+                } catch (e) {}
+            }
+
+            function setVal(id, val) {
+                const el = document.getElementById(id);
+                if (el && val !== undefined && val !== null) el.value = val;
+            }
+
+            /* ── IMPORT / EXPORT ── */
+            function exportJSON() {
+                const data = collectData();
+                const name = (v("r-name") || "resume")
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-|-$/g, "");
+                const blob = new Blob([JSON.stringify(data, null, 2)], {
+                    type: "application/json",
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${name || "resume"}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast("data exported ✓");
+            }
+
+            function handleImportFile(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const d = JSON.parse(e.target.result);
+                        applyData(d);
+                        rebuildAll();
+                        toast("data imported ✓");
+                    } catch (err) {
+                        toast("couldn't read that file");
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = "";
+            }
+
+            function resetAll() {
+                if (
+                    !confirm(
+                        "Reset everything to a blank resume? This clears your saved data in this browser.",
+                    )
+                )
+                    return;
+                localStorage.removeItem("resume_builder_save");
+                location.reload();
+            }
+
+            /* ── DOC SWITCH ── */
+            let currentDoc = "resume";
+            function switchDocByName(doc) {
+                document.querySelectorAll(".doc-tab").forEach((t, i) => {
+                    t.classList.toggle(
+                        "active",
+                        (i === 0 && doc === "resume") ||
+                            (i === 1 && doc === "coverletter"),
+                    );
+                });
+                document
+                    .querySelectorAll('.editor-panel[id^="editor-"]')
+                    .forEach((p) => p.classList.remove("active"));
+                document
+                    .getElementById("editor-" + doc)
+                    .classList.add("active");
+                document
+                    .querySelectorAll(".doc-view")
+                    .forEach((v) => v.classList.remove("active"));
+                document.getElementById("view-" + doc).classList.add("active");
+                currentDoc = doc;
+                if (doc === "resume") requestAnimationFrame(updateFit);
+            }
+            function switchDoc(doc) {
+                switchDocByName(doc);
+            }
+
+            /* ── MOBILE EDITOR / PREVIEW TOGGLE ── */
+            function setMobileView(view) {
+                document
+                    .querySelector(".main")
+                    .classList.toggle("show-preview", view === "preview");
+                document.querySelectorAll(".mv-btn").forEach((b) => {
+                    b.classList.toggle("active", b.dataset.view === view);
+                });
+            }
+
+            /* ── TAB SWITCH ── */
+            const tabOrder = ["info", "exp", "edu", "skills", "certs", "design"];
+            let currentTab = "info";
+
+            function switchTab(tab) {
+                document
+                    .querySelectorAll(
+                        "#editor-resume > .editor-scroll > .editor-panel",
+                    )
+                    .forEach((p) => p.classList.remove("active"));
+                document.getElementById("tab-" + tab).classList.add("active");
+                document
+                    .querySelectorAll(".section-tab[data-tab]")
+                    .forEach((b) => b.classList.remove("active"));
+                const activeBtn = document.querySelector(
+                    `.section-tab[data-tab="${tab}"]`,
+                );
+                activeBtn.classList.add("active");
+                activeBtn.scrollIntoView({
+                    block: "nearest",
+                    inline: "nearest",
+                });
+                currentTab = tab;
+                document.getElementById("editor-scroll").scrollTop = 0;
+            }
+
+            /* ── CUSTOM TAB SCROLLBAR ── */
+            (function initTabScrollbar() {
+                const tabs = document.getElementById("resume-section-tabs");
+                const wrap = document.getElementById("tab-scrollbar");
+                const track = document.getElementById("tab-scrollbar-track");
+                const thumb = document.getElementById("tab-scrollbar-thumb");
+                if (!tabs || !wrap || !track || !thumb) return;
+
+                function update() {
+                    const trackW = track.offsetWidth;
+                    const ratio = tabs.clientWidth / tabs.scrollWidth;
+                    if (ratio >= 1) {
+                        wrap.classList.add("hidden");
+                        return;
+                    }
+                    wrap.classList.remove("hidden");
+                    const thumbW = Math.max(24, trackW * ratio);
+                    const maxThumbLeft = trackW - thumbW;
+                    const maxScroll = tabs.scrollWidth - tabs.clientWidth;
+                    const left =
+                        maxThumbLeft * (tabs.scrollLeft / maxScroll);
+                    thumb.style.width = thumbW + "px";
+                    thumb.style.left = left + "px";
+                }
+
+                let dragging = false,
+                    dragStartX = 0,
+                    dragStartScroll = 0;
+                thumb.addEventListener("mousedown", (e) => {
+                    dragging = true;
+                    thumb.classList.add("dragging");
+                    dragStartX = e.clientX;
+                    dragStartScroll = tabs.scrollLeft;
+                    e.preventDefault();
+                });
+                window.addEventListener("mousemove", (e) => {
+                    if (!dragging) return;
+                    const trackW = track.offsetWidth;
+                    const thumbW = thumb.offsetWidth;
+                    const maxThumbLeft = trackW - thumbW;
+                    const maxScroll = tabs.scrollWidth - tabs.clientWidth;
+                    const dx = e.clientX - dragStartX;
+                    tabs.scrollLeft =
+                        dragStartScroll +
+                        (dx / maxThumbLeft) * maxScroll;
+                });
+                window.addEventListener("mouseup", () => {
+                    if (!dragging) return;
+                    dragging = false;
+                    thumb.classList.remove("dragging");
+                });
+                track.addEventListener("click", (e) => {
+                    if (e.target === thumb) return;
+                    const rect = track.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const thumbW = thumb.offsetWidth;
+                    const maxThumbLeft = track.offsetWidth - thumbW;
+                    const targetLeft = Math.min(
+                        Math.max(clickX - thumbW / 2, 0),
+                        maxThumbLeft,
+                    );
+                    const maxScroll = tabs.scrollWidth - tabs.clientWidth;
+                    tabs.scrollLeft = (targetLeft / maxThumbLeft) * maxScroll;
+                });
+
+                tabs.addEventListener("scroll", update);
+                window.addEventListener("resize", update);
+                update();
+                window.updateTabScrollbar = update;
+            })();
+
+            function nextTab() {
+                if (currentDoc !== "resume") return;
+                const i = tabOrder.indexOf(currentTab);
+                if (i < tabOrder.length - 1) switchTab(tabOrder[i + 1]);
+            }
+            function prevTab() {
+                if (currentDoc !== "resume") return;
+                const i = tabOrder.indexOf(currentTab);
+                if (i > 0) switchTab(tabOrder[i - 1]);
+            }
+
+            /* ── DESIGN PANEL ── */
+            function buildDesignPanel() {
+                const grid = document.getElementById("theme-grid");
+                grid.innerHTML = THEMES.map(
+                    (t) => `
+        <button class="theme-card" data-theme="${t.id}" onclick="setTheme('${t.id}')">
+          <div class="theme-thumb" data-theme="${t.id}">
+            <div class="tt-head"></div>
+            <div class="tt-body"><div class="tt-col"></div><div class="tt-side"></div></div>
+          </div>
+          <span>${t.name}</span>
+        </button>`,
+                ).join("");
+
+                const row = document.getElementById("swatch-row");
+                row.innerHTML = ACCENTS.map(
+                    (c) =>
+                        `<button class="swatch" style="--c:${c}" data-accent="${c}" onclick="setAccent('${c}')" title="${c}"></button>`,
+                ).join("");
+
+                syncDesignUI();
+            }
+
+            function syncDesignUI() {
+                document
+                    .querySelectorAll(".theme-card")
+                    .forEach((b) =>
+                        b.classList.toggle(
+                            "active",
+                            b.dataset.theme === design.theme,
+                        ),
+                    );
+                document
+                    .querySelectorAll(".swatch")
+                    .forEach((b) =>
+                        b.classList.toggle(
+                            "active",
+                            b.dataset.accent === design.accent,
+                        ),
+                    );
+                document
+                    .querySelectorAll("#font-seg button")
+                    .forEach((b) =>
+                        b.classList.toggle(
+                            "active",
+                            b.dataset.font === design.font,
+                        ),
+                    );
+                document
+                    .querySelectorAll("#page-seg button")
+                    .forEach((b) =>
+                        b.classList.toggle(
+                            "active",
+                            b.dataset.page === design.pageSize,
+                        ),
+                    );
+                document
+                    .querySelectorAll("#density-seg button")
+                    .forEach((b) =>
+                        b.classList.toggle(
+                            "active",
+                            b.dataset.density === design.density,
+                        ),
+                    );
+                // tint theme thumbnails with the chosen accent
+                document.querySelectorAll(".theme-thumb").forEach((t) => {
+                    t.style.setProperty("--doc-accent", design.accent);
+                });
+            }
+
+            function applyDesign() {
+                ["rp", "print-rp", "clp", "print-cl"].forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    el.dataset.theme = design.theme;
+                    el.dataset.font = design.font;
+                    el.dataset.density = design.density;
+                    el.dataset.pagesize = design.pageSize;
+                    el.style.setProperty("--doc-accent", design.accent);
+                });
+                // drive the real PDF page size
+                let ps = document.getElementById("print-page-style");
+                if (!ps) {
+                    ps = document.createElement("style");
+                    ps.id = "print-page-style";
+                    document.head.appendChild(ps);
+                }
+                ps.textContent = `@media print{@page{size:${design.pageSize === "a4" ? "A4" : "Letter"};margin:0}}`;
+                updateFit();
+            }
+
+            /* ── ONE-PAGE FIT METER ── */
+            function updateFit() {
+                const rp = document.getElementById("rp");
+                const meter = document.getElementById("fit-meter");
+                const edge = document.getElementById("page-edge");
+                if (!rp || !meter) return;
+                const width = rp.clientWidth;
+                if (!width) return; // hidden (e.g. cover-letter view)
+                const pageH = width * (PAGE_RATIO[design.pageSize] || PAGE_RATIO.letter);
+                rp.style.minHeight = pageH + "px";
+                const pages = rp.scrollHeight / pageH;
+                if (pages <= 1.02) {
+                    meter.textContent = "✓ Fits 1 page";
+                    meter.className = "fit-meter ok";
+                    edge.style.display = "none";
+                } else if (pages < 1.25) {
+                    meter.textContent = "Slightly over — try Compact";
+                    meter.className = "fit-meter warn";
+                    edge.style.top = pageH + "px";
+                    edge.style.display = "block";
+                } else {
+                    meter.textContent = `≈ ${pages.toFixed(1)} pages`;
+                    meter.className = "fit-meter over";
+                    edge.style.top = pageH + "px";
+                    edge.style.display = "block";
+                }
+            }
+
+            function setTheme(id) {
+                design.theme = id;
+                applyDesign();
+                syncDesignUI();
+                scheduleSave();
+                toast(THEMES.find((t) => t.id === id).name + " template");
+            }
+            function setAccent(c) {
+                design.accent = c;
+                applyDesign();
+                syncDesignUI();
+                scheduleSave();
+            }
+            function setFont(f) {
+                design.font = f;
+                applyDesign();
+                syncDesignUI();
+                scheduleSave();
+            }
+            function setPageSize(p) {
+                design.pageSize = p;
+                applyDesign();
+                syncDesignUI();
+                scheduleSave();
+                toast(p === "a4" ? "A4 page" : "US Letter page");
+            }
+            function setDensity(d) {
+                design.density = d;
+                applyDesign();
+                syncDesignUI();
+                scheduleSave();
+            }
+
+            /* ── JOB EDITOR ── */
+            function buildJobEditor() {
+                const list = document.getElementById("exp-list");
+                list.innerHTML = "";
+                jobs.forEach((job, i) => {
+                    const d = document.createElement("div");
+                    d.className = "job-card";
+                    d.innerHTML = `
+      <div class="job-card-head">
+        <div class="job-card-info">
+          <div class="job-card-title">${x(job.title) || "Position"}</div>
+          <div class="job-card-org">${x(job.org)}</div>
+        </div>
+        <div class="job-card-actions">
+          ${i > 0 ? `<button class="icon-btn" onclick="moveJob(${i},-1)" title="Move up">↑</button>` : ""}
+          ${i < jobs.length - 1 ? `<button class="icon-btn" onclick="moveJob(${i},1)" title="Move down">↓</button>` : ""}
+          <button class="icon-btn del" onclick="removeJob(${i})" title="Remove">✕</button>
+        </div>
+      </div>
+      <div class="job-card-body">
+        <div class="grid-2">
+          <div class="field"><label>Title</label><input value="${x(job.title)}" oninput="jobs[${i}].title=this.value;refreshCard(${i},this.value,null);renderResume()"></div>
+          <div class="field"><label>Dates</label><input value="${x(job.date)}" oninput="jobs[${i}].date=this.value;renderResume()"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Company</label><input value="${x(job.org)}" oninput="jobs[${i}].org=this.value;refreshCard(${i},null,this.value);renderResume()"></div>
+          <div class="field"><label>Location</label><input value="${x(job.loc)}" oninput="jobs[${i}].loc=this.value;renderResume()"></div>
+        </div>
+        <div class="field"><label>Bullets — one per line</label><textarea class="tall" oninput="jobs[${i}].bullets=this.value;renderResume()">${x(job.bullets)}</textarea></div>
+      </div>`;
+                    list.appendChild(d);
+                });
+            }
+
+            function refreshCard(i, title, org) {
+                const cards = document.querySelectorAll("#exp-list .job-card");
+                if (!cards[i]) return;
+                if (title !== null)
+                    cards[i].querySelector(".job-card-title").textContent =
+                        title || "Position";
+                if (org !== null)
+                    cards[i].querySelector(".job-card-org").textContent =
+                        org || "";
+            }
+
+            function addJob() {
+                jobs.push({
+                    title: "Position",
+                    org: "Company",
+                    loc: "City, SK",
+                    date: "Month YYYY – Present",
+                    bullets: "What you did.",
+                });
+                buildJobEditor();
+                renderResume();
+            }
+            function removeJob(i) {
+                const item = jobs[i];
+                jobs.splice(i, 1);
+                buildJobEditor();
+                renderResume();
+                toast("position removed", {
+                    label: "Undo",
+                    fn: () => {
+                        jobs.splice(i, 0, item);
+                        buildJobEditor();
+                        renderResume();
+                    },
+                });
+            }
+            function moveJob(i, dir) {
+                const j = i + dir;
+                if (j < 0 || j >= jobs.length) return;
+                [jobs[i], jobs[j]] = [jobs[j], jobs[i]];
+                buildJobEditor();
+                renderResume();
+            }
+
+            /* ── SKILL EDITOR ── */
+            function buildSkillEditor() {
+                const wrap = document.getElementById("skill-groups");
+                wrap.innerHTML = "";
+                skillGroups.forEach((group, gi) => {
+                    const d = document.createElement("div");
+                    d.className = "job-card";
+                    d.style.marginBottom = "10px";
+                    const tagsHTML = group.skills
+                        .map(
+                            (s, si) =>
+                                `<span class="skill-tag-edit">
+        <span class="skill-tag-text">${x(s)}</span>
+        <button class="skill-tag-del" onclick="removeSkill(${gi},${si})" title="Remove skill">✕</button>
+      </span>`,
+                        )
+                        .join("");
+                    d.innerHTML = `
+      <div class="job-card-head">
+        <div class="job-card-info" style="display:flex;align-items:center;gap:6px;min-width:0;">
+          <input class="heading-input" value="${x(group.heading)}" oninput="skillGroups[${gi}].heading=this.value;renderResume()" placeholder="Category">
+        </div>
+        <div class="job-card-actions">
+          ${gi > 0 ? `<button class="icon-btn" onclick="moveSkillGroup(${gi},-1)">↑</button>` : ""}
+          ${gi < skillGroups.length - 1 ? `<button class="icon-btn" onclick="moveSkillGroup(${gi},1)">↓</button>` : ""}
+          <button class="icon-btn del" onclick="removeSkillGroup(${gi})">✕</button>
+        </div>
+      </div>
+      <div class="skill-tag-wrap" id="tags-${gi}">${tagsHTML}</div>
+      <div class="skill-add-row">
+        <input class="skill-add-input" id="skill-input-${gi}" placeholder="Type a skill, press Enter"
+          onkeydown="if(event.key==='Enter'){addSkill(${gi});event.preventDefault()}">
+        <button class="skill-add-btn" onclick="addSkill(${gi})" title="Add skill">+</button>
+      </div>`;
+                    wrap.appendChild(d);
+                });
+            }
+
+            function addSkill(gi) {
+                const inp = document.getElementById(`skill-input-${gi}`);
+                const val = inp.value.trim();
+                if (!val) return;
+                skillGroups[gi].skills.push(val);
+                inp.value = "";
+                buildSkillEditor();
+                renderResume();
+            }
+            function removeSkill(gi, si) {
+                const item = skillGroups[gi].skills[si];
+                skillGroups[gi].skills.splice(si, 1);
+                buildSkillEditor();
+                renderResume();
+                toast("skill removed", {
+                    label: "Undo",
+                    fn: () => {
+                        if (!skillGroups[gi]) return;
+                        skillGroups[gi].skills.splice(si, 0, item);
+                        buildSkillEditor();
+                        renderResume();
+                    },
+                });
+            }
+            function addSkillGroup() {
+                skillGroups.push({ heading: "New Category", skills: [] });
+                buildSkillEditor();
+                renderResume();
+            }
+            function removeSkillGroup(gi) {
+                const item = skillGroups[gi];
+                skillGroups.splice(gi, 1);
+                buildSkillEditor();
+                renderResume();
+                toast("category removed", {
+                    label: "Undo",
+                    fn: () => {
+                        skillGroups.splice(gi, 0, item);
+                        buildSkillEditor();
+                        renderResume();
+                    },
+                });
+            }
+            function moveSkillGroup(gi, dir) {
+                const j = gi + dir;
+                if (j < 0 || j >= skillGroups.length) return;
+                [skillGroups[gi], skillGroups[j]] = [
+                    skillGroups[j],
+                    skillGroups[gi],
+                ];
+                buildSkillEditor();
+                renderResume();
+            }
+
+            /* ── EDUCATION EDITOR ── */
+            function buildEduEditor() {
+                const list = document.getElementById("edu-list");
+                list.innerHTML = "";
+                eduList.forEach((ed, i) => {
+                    const d = document.createElement("div");
+                    d.className = "job-card";
+                    d.innerHTML = `
+      <div class="job-card-head">
+        <div class="job-card-info">
+          <div class="job-card-title">${x(ed.school) || "School"}</div>
+          <div class="job-card-org">${x(ed.degree)}</div>
+        </div>
+        <div class="job-card-actions">
+          ${i > 0 ? `<button class="icon-btn" onclick="moveEdu(${i},-1)" title="Move up">↑</button>` : ""}
+          ${i < eduList.length - 1 ? `<button class="icon-btn" onclick="moveEdu(${i},1)" title="Move down">↓</button>` : ""}
+          <button class="icon-btn del" onclick="removeEdu(${i})" title="Remove">✕</button>
+        </div>
+      </div>
+      <div class="job-card-body">
+        <div class="field"><label>School</label><input value="${x(ed.school)}" oninput="eduList[${i}].school=this.value;refreshEduCard(${i},this.value,null);renderResume()"></div>
+        <div class="field"><label>Degree / Diploma</label><input value="${x(ed.degree)}" oninput="eduList[${i}].degree=this.value;refreshEduCard(${i},null,this.value);renderResume()"></div>
+        <div class="grid-2">
+          <div class="field"><label>Date</label><input value="${x(ed.date)}" oninput="eduList[${i}].date=this.value;renderResume()"></div>
+          <div class="field"><label>Location</label><input value="${x(ed.loc)}" oninput="eduList[${i}].loc=this.value;renderResume()"></div>
+        </div>
+      </div>`;
+                    list.appendChild(d);
+                });
+            }
+
+            function refreshEduCard(i, school, degree) {
+                const cards = document.querySelectorAll("#edu-list .job-card");
+                if (!cards[i]) return;
+                if (school !== null)
+                    cards[i].querySelector(".job-card-title").textContent =
+                        school || "School";
+                if (degree !== null)
+                    cards[i].querySelector(".job-card-org").textContent =
+                        degree || "";
+            }
+
+            function addEdu() {
+                eduList.push({
+                    school: "School name",
+                    degree: "Degree / Diploma",
+                    date: "Year",
+                    loc: "City, Prov",
+                });
+                buildEduEditor();
+                renderResume();
+            }
+            function removeEdu(i) {
+                const item = eduList[i];
+                eduList.splice(i, 1);
+                buildEduEditor();
+                renderResume();
+                toast("education removed", {
+                    label: "Undo",
+                    fn: () => {
+                        eduList.splice(i, 0, item);
+                        buildEduEditor();
+                        renderResume();
+                    },
+                });
+            }
+            function moveEdu(i, dir) {
+                const j = i + dir;
+                if (j < 0 || j >= eduList.length) return;
+                [eduList[i], eduList[j]] = [eduList[j], eduList[i]];
+                buildEduEditor();
+                renderResume();
+            }
+
+            /* ── CERT EDITOR ── */
+            function buildCertEditor() {
+                const list = document.getElementById("cert-list");
+                list.innerHTML = "";
+                certs.forEach((cert, i) => {
+                    const d = document.createElement("div");
+                    d.className = "cert-row";
+                    d.innerHTML = `<input class="cert-input" value="${x(cert)}" oninput="certs[${i}]=this.value;renderResume()"><button class="icon-btn del" onclick="removeCert(${i})" title="Remove">✕</button>`;
+                    list.appendChild(d);
+                });
+            }
+            function addCert() {
+                certs.push("New Certification");
+                buildCertEditor();
+                renderResume();
+            }
+            function removeCert(i) {
+                const item = certs[i];
+                certs.splice(i, 1);
+                buildCertEditor();
+                renderResume();
+                toast("certification removed", {
+                    label: "Undo",
+                    fn: () => {
+                        certs.splice(i, 0, item);
+                        buildCertEditor();
+                        renderResume();
+                    },
+                });
+            }
+
+            /* ── HELPERS ── */
+            function x(s) {
+                return (s || "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;");
+            }
+            function v(id) {
+                const el = document.getElementById(id);
+                return el ? el.value : "";
+            }
+
+            /* ── RESUME HTML ── */
+            function buildResumeHTML() {
+                const name = v("r-name"),
+                    headline = v("r-headline"),
+                    phone = v("r-phone"),
+                    email = v("r-email"),
+                    city = v("r-city"),
+                    locrest = v("r-locrest"),
+                    link = v("r-link"),
+                    summary = v("r-summary");
+                const loc = [city, locrest].filter(Boolean).join(", ");
+                const contactParts = [];
+                if (loc)
+                    contactParts.push(
+                        `<span class="rp-contact-item">${x(loc)}</span>`,
+                    );
+                if (phone)
+                    contactParts.push(
+                        `<a class="rp-contact-item" href="tel:${x(phone.replace(/[^\d+]/g, ""))}">${x(phone)}</a>`,
+                    );
+                if (email)
+                    contactParts.push(
+                        `<a class="rp-contact-item" href="mailto:${x(email)}">${x(email)}</a>`,
+                    );
+                if (link) {
+                    const href = /^https?:\/\//i.test(link)
+                        ? link
+                        : "https://" + link;
+                    contactParts.push(
+                        `<a class="rp-contact-item" href="${x(href)}" target="_blank" rel="noopener">${x(link)}</a>`,
+                    );
+                }
+                const contact = contactParts.join("");
+                const headlineHTML = headline.trim()
+                    ? `<div class="rp-headline">${x(headline)}</div>`
+                    : "";
+                const summaryHTML = summary.trim()
+                    ? `<div class="rp-summary-wrap"><div class="rp-section-label">Summary</div><p class="rp-summary">${x(summary).replace(/\n/g, "<br>")}</p></div>`
+                    : "";
+                const jobsHTML = jobs
+                    .map((j) => {
+                        const bl = j.bullets
+                            .split("\n")
+                            .filter((b) => b.trim())
+                            .map((b) => `<li>${x(b.trim())}</li>`)
+                            .join("");
+                        return `<div class="rp-entry"><div class="rp-row"><span class="rp-title">${x(j.title)}</span><span class="rp-date">${x(j.date)}</span></div><div class="rp-org">${[x(j.org), x(j.loc)].filter(Boolean).join(" · ")}</div><ul class="rp-bullets">${bl}</ul></div>`;
+                    })
+                    .join("");
+                const skillsHTML = skillGroups
+                    .map((g) =>
+                        g.skills.length
+                            ? `<div class="rp-section"><div class="rp-section-label">${x(g.heading)}</div><div class="rp-chips">${g.skills.map((s) => `<span class="rp-chip">${x(s)}</span>`).join("")}</div></div>`
+                            : "",
+                    )
+                    .join("");
+                const certsHTML = certs.length
+                    ? `<div class="rp-section"><div class="rp-section-label">Certifications</div>${certs.map((c) => `<div class="rp-cert">${x(c)}</div>`).join("")}</div>`
+                    : "";
+                const eduHTML = eduList.length
+                    ? `<div class="rp-section"><div class="rp-section-label">Education</div>${eduList
+                          .map(
+                              (ed) =>
+                                  `<div class="rp-edu-item"><div class="rp-edu-school">${x(ed.school)}</div><div class="rp-edu-deg">${x(ed.degree)}</div><div class="rp-edu-date">${[x(ed.date), x(ed.loc)].filter(Boolean).join(" · ")}</div></div>`,
+                          )
+                          .join("")}</div>`
+                    : "";
+                return `<div class="rp-header"><div class="rp-name">${x(name)}</div>${headlineHTML}<div class="rp-contact">${contact}</div></div>
+    ${summaryHTML}
+    <div class="rp-body"><main><div class="rp-section"><div class="rp-section-label">Work Experience</div>${jobsHTML}</div></main>
+    <aside>${eduHTML}${skillsHTML}${certsHTML}<div class="rp-refs">References available upon request.</div></aside></div>`;
+            }
+
+            /* ── CL HTML ── */
+            function buildCLHTML() {
+                const name = v("r-name"),
+                    headline = v("r-headline").trim(),
+                    phone = v("r-phone"),
+                    email = v("r-email"),
+                    city = v("r-city"),
+                    locrest = v("r-locrest"),
+                    link = v("r-link");
+                const manager = v("cl-manager").trim(),
+                    company = v("cl-company").trim(),
+                    position = v("cl-position").trim(),
+                    addr = v("cl-addr").trim();
+                const opening = v("cl-opening"),
+                    body = v("cl-body"),
+                    closing = v("cl-closing"),
+                    val = v("cl-val") || "Sincerely";
+                const dateStr =
+                    v("cl-date") ||
+                    new Date().toLocaleDateString("en-CA", {
+                        month: "long",
+                        year: "numeric",
+                    });
+                const fullBody = [opening, body, closing]
+                    .filter(Boolean)
+                    .join("\n\n");
+                const loc = [city, locrest].filter(Boolean).join(", ");
+
+                // sender contact — clickable, matching the résumé
+                const senderParts = [];
+                if (loc) senderParts.push(`<span>${x(loc)}</span>`);
+                if (phone)
+                    senderParts.push(
+                        `<a href="tel:${x(phone.replace(/[^\d+]/g, ""))}">${x(phone)}</a>`,
+                    );
+                if (email)
+                    senderParts.push(
+                        `<a href="mailto:${x(email)}">${x(email)}</a>`,
+                    );
+                if (link) {
+                    const href = /^https?:\/\//i.test(link)
+                        ? link
+                        : "https://" + link;
+                    senderParts.push(
+                        `<a href="${x(href)}" target="_blank" rel="noopener">${x(link)}</a>`,
+                    );
+                }
+
+                // recipient block — only render lines that exist
+                const recipientHTML = [
+                    manager
+                        ? `<div class="cl-recipient-name">${x(manager)}</div>`
+                        : "",
+                    company
+                        ? `<div class="cl-recipient-detail">${x(company)}</div>`
+                        : "",
+                    addr
+                        ? `<div class="cl-recipient-detail">${x(addr)}</div>`
+                        : "",
+                ].join("");
+
+                // subject line — gives the Position field a purpose
+                const subjectText = position
+                    ? `Application for ${x(position)}${company ? " at " + x(company) : ""}`
+                    : company
+                      ? `Application — ${x(company)}`
+                      : "";
+                const subjectHTML = subjectText
+                    ? `<div class="cl-subject">Re: ${subjectText}</div>`
+                    : "";
+
+                const greeting = manager || "Hiring Manager";
+
+                return `<div class="cl-date">${x(dateStr)}</div>
+    <div class="cl-sender-name">${x(name)}</div>
+    ${headline ? `<div class="cl-sender-role">${x(headline)}</div>` : ""}
+    <div class="cl-sender-contact">${senderParts.join("<br>")}</div>
+    <div class="cl-bar"></div>
+    ${recipientHTML}
+    ${subjectHTML}
+    <div class="cl-salutation">Dear ${x(greeting)},</div>
+    <div class="cl-body">${x(fullBody)}</div>
+    <div class="cl-closing">${x(val)},</div>
+    <div class="cl-sig">${x(name)}</div>`;
+            }
+
+            function updateResumeMeta() {
+                const meta = document.getElementById("resume-meta");
+                const t = THEMES.find((t) => t.id === design.theme);
+                meta.textContent = t ? t.name : "";
+            }
+
+            function renderResume() {
+                const h = buildResumeHTML();
+                document.getElementById("rp").innerHTML = h;
+                document.getElementById("print-rp").innerHTML = h;
+                updateResumeMeta();
+                updateFit();
+                updateResumeStrength();
+                updateTabCounts();
+                scheduleSave();
+            }
+
+            /* ── PROGRESS ── */
+            function updateResumeStrength() {
+                let score = 0;
+                if (v("r-name").trim()) score += 10;
+                if (v("r-headline").trim()) score += 8;
+                if (v("r-phone").trim() && v("r-email").trim()) score += 8;
+                if (v("r-city").trim() && v("r-locrest").trim()) score += 6;
+                if (v("r-summary").trim().length >= 40) score += 12;
+                if (jobs.some((j) => j.title.trim() && j.org.trim()))
+                    score += 18;
+                if (eduList.some((e) => e.school.trim())) score += 12;
+                if (skillGroups.some((g) => g.skills.length)) score += 16;
+                if (certs.length) score += 6;
+                if (v("r-link").trim()) score += 4;
+
+                const pct = Math.min(100, Math.round(score));
+                const circumference = 97.4;
+                const fill = document.getElementById("strength-fill");
+                if (!fill) return;
+                fill.style.strokeDashoffset =
+                    circumference * (1 - pct / 100);
+                document.getElementById("strength-pct").textContent =
+                    pct + "%";
+                document
+                    .getElementById("strength-meter")
+                    .classList.toggle("complete", pct >= 100);
+                document.getElementById("strength-meter").title =
+                    pct >= 100
+                        ? "Resume strength: complete"
+                        : `Resume strength: ${pct}%`;
+            }
+
+            function updateTabCounts() {
+                const setCount = (id, n) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = n > 0 ? n : "";
+                };
+                setCount("tc-exp", jobs.length);
+                setCount("tc-edu", eduList.length);
+                setCount(
+                    "tc-skills",
+                    skillGroups.reduce((s, g) => s + g.skills.length, 0),
+                );
+                setCount("tc-certs", certs.length);
+            }
+
+            function renderCL() {
+                const h = buildCLHTML();
+                document.getElementById("clp").innerHTML = h;
+                document.getElementById("print-cl").innerHTML = h;
+                scheduleSave();
+            }
+
+            function rebuildAll() {
+                buildJobEditor();
+                buildEduEditor();
+                buildSkillEditor();
+                buildCertEditor();
+                applyDesign();
+                syncDesignUI();
+                renderResume();
+                renderCL();
+            }
+
+            /* ── INIT ── */
+            loadSnapshot();
+            buildDesignPanel();
+            buildJobEditor();
+            buildEduEditor();
+            buildSkillEditor();
+            buildCertEditor();
+            applyDesign();
+            renderResume();
+            renderCL();
+            setSaveStatus("saved");
+
+            /* keep the fit meter accurate as fonts load / window resizes */
+            let _fitRAF;
+            window.addEventListener("resize", () => {
+                cancelAnimationFrame(_fitRAF);
+                _fitRAF = requestAnimationFrame(updateFit);
+            });
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(updateFit);
+            }
+            setTimeout(updateFit, 300);
+        </script>
+    </body>
+</html>
