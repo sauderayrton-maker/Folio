@@ -1,5 +1,28 @@
 # Changelog
 
+## Phase 2a — Named slots: résumé profiles & budget scenarios (2026-07-03)
+
+Implements decision #15 of `handoff.md` and the two flagship features on it.
+
+- **Shared slots utility** (`Folio.slots` in `js/storage.js`): one mechanism
+  for every "multiple documents" need — envelope
+  `{ slotsVersion, activeId, slots: [{ id, name, updatedAt, data }] }` under
+  the studio's existing localStorage key. Legacy singleton saves migrate to
+  slot #1 automatically on first load.
+- **Shared switcher UI** (`Folio.slotSwitcher` in `js/shell.js` + styles in
+  `css/base.css`): a topbar select + ⋯ menu with New / Duplicate / Rename /
+  Delete. Deleting the last slot is refused; the current slot is always
+  saved before any switch.
+- **Resume Studio: multiple résumé profiles.** Tailor one résumé per role;
+  new profiles start blank (not sample content). "Reset everything" now
+  clearly warns it deletes all profiles.
+- **Flow: budget scenarios.** "Current" vs "with raise" vs "after move" —
+  each scenario is a full independent budget; switching re-applies every
+  input and chart. Pre-slots `flow_save` blobs and the older six-key format
+  both migrate forward untouched.
+- Tests: 13 Playwright smoke tests (was 10), covering slot creation,
+  switching, and all three migration paths.
+
 ## Phase 1 — Consistency & trust (2026-07-03)
 
 Implements Phase 1 of `handoff.md`.

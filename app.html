@@ -33,6 +33,7 @@
                 <a class="pill-link" href="budget.html">Flow</a>
             </div>
             <div class="topbar-right">
+                <div class="slot-switcher" id="profile-switcher"></div>
                 <div class="strength-meter" id="strength-meter" title="Resume strength">
                     <svg class="strength-ring" viewBox="0 0 36 36" aria-hidden="true">
                         <circle class="strength-track" cx="18" cy="18" r="15.5"></circle>
@@ -780,11 +781,51 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                 };
             }
 
+            /* ── PROFILES (named slots — one per tailored résumé) ── */
+            const profiles = Folio.slots.open("resume_builder_save", {
+                defaultName: "My résumé",
+            });
+
+            function blankResumeData() {
+                return {
+                    version: 2,
+                    design: {
+                        theme: "classic",
+                        accent: "#c4622d",
+                        font: "sans",
+                        pageSize: "letter",
+                        density: "cozy",
+                    },
+                    info: {
+                        name: "",
+                        headline: "",
+                        phone: "",
+                        email: "",
+                        city: "",
+                        locrest: "",
+                        link: "",
+                        summary: "",
+                    },
+                    eduList: [],
+                    jobs: [],
+                    skillGroups: [],
+                    certs: [],
+                    cl: {
+                        manager: "",
+                        company: "",
+                        position: "",
+                        addr: "",
+                        opening: "",
+                        body: "",
+                        closing: "",
+                        val: "Sincerely",
+                        date: "",
+                    },
+                };
+            }
+
             function saveSnapshot() {
-                const ok = Folio.store.write(
-                    "resume_builder_save",
-                    collectData(),
-                );
+                const ok = profiles.setData(collectData());
                 if (!ok) setSaveStatus("error");
                 return ok;
             }
@@ -846,14 +887,15 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
             }
 
             function loadSnapshot() {
-                const res = Folio.store.read("resume_builder_save");
+                const res = profiles.load();
                 if (!res.ok) {
                     toast("couldn't restore your saved data — starting fresh");
                     return;
                 }
-                if (!res.data) return;
+                const data = profiles.getData();
+                if (!data) return; // fresh slot — keep the sample content
                 try {
-                    applyData(res.data);
+                    applyData(data);
                 } catch (e) {
                     toast("couldn't restore your saved data — starting fresh");
                 }
@@ -904,7 +946,7 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
             function resetAll() {
                 if (
                     !confirm(
-                        "Reset everything to a blank resume? This clears your saved data in this browser.",
+                        "Reset everything? This deletes ALL résumé profiles saved in this browser.",
                     )
                 )
                     return;
@@ -1742,6 +1784,23 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
             renderResume();
             renderCL();
             setSaveStatus("saved");
+
+            /* profile switcher (shared slot UI from js/shell.js) */
+            Folio.slotSwitcher(
+                document.getElementById("profile-switcher"),
+                profiles,
+                {
+                    noun: "profile",
+                    blankData: blankResumeData,
+                    beforeSwitch: () => saveSnapshot(),
+                    onSwitch: () => {
+                        clearTimeout(_saveTimer);
+                        applyData(profiles.getData() || blankResumeData());
+                        rebuildAll();
+                        setSaveStatus("saved");
+                    },
+                },
+            );
 
             /* keep the fit meter accurate as fonts load / window resizes */
             let _fitRAF;

@@ -270,6 +270,7 @@
                 <span class="pill-link active">Flow</span>
             </div>
             <div class="topbar-right">
+                <div class="slot-switcher" id="scenario-switcher"></div>
                 <span class="save-dot" id="save-dot"></span>
             </div>
         </header>
@@ -808,14 +809,27 @@
         setText('cf-date', new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'}));
 
         // ── Persistence ───────────────────────────────────────────────────────
-        // One versioned blob (schema v1). Bump the version + migrate in
-        // restore() whenever the shape of the saved data changes.
-        const FLOW_KEY = 'flow_save';
-        function persist() {
-            flash(Folio.store.write(FLOW_KEY, {
+        // Scenarios are named slots (see js/storage.js); each slot holds one
+        // versioned blob (schema v1). Legacy flat blobs and the older six-key
+        // format both migrate forward on load.
+        const scenarios = Folio.slots.open('flow_save', { defaultName: 'My budget' });
+
+        function collectBlob() {
+            return { version: 1, incomes, taxCfg, housing, expenses, accounts, investments };
+        }
+
+        function blankFlowData() {
+            return {
                 version: 1,
-                incomes, taxCfg, housing, expenses, accounts, investments,
-            }));
+                incomes: [],
+                taxCfg: { country: 'CA', region: 'ON' },
+                housing: { type: 'none', rent: 0, price: 450000, downPct: 10, rate: 6.5, years: 25 },
+                expenses: [], accounts: [], investments: [],
+            };
+        }
+
+        function persist() {
+            flash(scenarios.setData(collectBlob()));
         }
 
         function applyBlob(d) {
@@ -828,19 +842,21 @@
         }
 
         function restore() {
-            const res = Folio.store.read(FLOW_KEY);
+            const res = scenarios.load(); // wraps legacy flat blobs as slot #1
             if (!res.ok) {
                 Folio.toast("couldn't restore your saved data — starting fresh");
                 return;
             }
-            if (res.data) { applyBlob(res.data); return; }
-            migrateLegacy();
+            let data = scenarios.getData();
+            if (!data) data = migrateLegacy();
+            if (data) applyBlob(data);
         }
 
         // pre-v1 saves: six loose keys, and before that a single wage/hours pair
         function migrateLegacy() {
             const OLD_KEYS = ['flow_incomes','flow_taxcfg','flow_housing','flow_exp','flow_accounts','flow_investments','flow_wage','flow_hrs','flow_tax'];
             try {
+                if (!OLD_KEYS.some(k => localStorage.getItem(k) !== null)) return null;
                 const si = localStorage.getItem('flow_incomes');
                 if (si) { incomes = JSON.parse(si); }
                 else {
@@ -862,15 +878,14 @@
                 if (ac) accounts = JSON.parse(ac);
                 const iv = localStorage.getItem('flow_investments');
                 if (iv) investments = JSON.parse(iv);
-                const hadLegacy = OLD_KEYS.some(k => localStorage.getItem(k) !== null);
-                if (hadLegacy && Folio.store.write(FLOW_KEY, {
-                    version: 1,
-                    incomes, taxCfg, housing, expenses, accounts, investments,
-                })) {
+                const blob = collectBlob();
+                if (scenarios.setData(blob)) {
                     OLD_KEYS.forEach(k => Folio.store.remove(k));
                 }
+                return blob;
             } catch(e) {
                 Folio.toast("couldn't restore your saved data — starting fresh");
+                return null;
             }
         }
 
@@ -1495,32 +1510,44 @@
         }
 
         // ── Boot ──────────────────────────────────────────────────────────────
-        restore();
-        setText('taxNote', `${FOLIO_TAX.year} tax data · estimates only — not tax advice`);
+        // Pushes the current in-memory state into every input + rerenders.
+        // Used at boot and again whenever the user switches scenarios.
+        function applyStateToUI() {
+            g('taxCountry').value = taxCfg.country;
+            updateTaxFields();
+            if (taxCfg.region) g('taxRegion').value = taxCfg.region;
+            g('taxManual').value = (taxCfg.country === 'manual' && taxCfg.manualRate) ? taxCfg.manualRate : 22;
 
-        // Apply restored tax config to UI
-        g('taxCountry').value = taxCfg.country;
-        updateTaxFields();
-        if (taxCfg.region) g('taxRegion').value = taxCfg.region;
-        if (taxCfg.country === 'manual' && taxCfg.manualRate) g('taxManual').value = taxCfg.manualRate;
+            g('rentAmt').value   = housing.rent    || '';
+            g('homePrice').value = housing.price   ?? 450000;
+            g('homeDown').value  = housing.downPct ?? 10;
+            g('homeRate').value  = housing.rate    ?? 6.5;
+            g('homeYears').value = housing.years   ?? 25;
+            setHousingType(housing.type);
+            if (housing.type === 'buy') renderMortgageCard();
 
-        // Apply restored housing to UI
-        setHousingType(housing.type);
-        if (housing.type === 'rent' && housing.rent)      g('rentAmt').value   = housing.rent;
-        if (housing.type === 'buy') {
-            g('homePrice').value = housing.price;
-            g('homeDown').value  = housing.downPct;
-            g('homeRate').value  = housing.rate;
-            g('homeYears').value = housing.years;
-            renderMortgageCard();
+            renderIncomeSources();
+            renderExpenses();
+            renderAccounts();
+            renderInvestments();
+            renderInvestmentProjections();
+            recalculate();
         }
 
-        renderIncomeSources();
-        renderExpenses();
-        renderAccounts();
-        renderInvestments();
-        renderInvestmentProjections();
-        recalculate();
+        restore();
+        setText('taxNote', `${FOLIO_TAX.year} tax data · estimates only — not tax advice`);
+        applyStateToUI();
+
+        // scenario switcher (shared slot UI from js/shell.js)
+        Folio.slotSwitcher(g('scenario-switcher'), scenarios, {
+            noun: 'scenario',
+            blankData: blankFlowData,
+            beforeSwitch: () => persist(),
+            onSwitch: () => {
+                applyBlob(scenarios.getData() || blankFlowData());
+                applyStateToUI();
+            },
+        });
         </script>
     </body>
 </html>

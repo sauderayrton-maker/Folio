@@ -60,6 +60,44 @@ test.describe("Resume Studio", () => {
         await expect(page.locator("#print-rp .rp-name")).toHaveCount(1);
         await expect(page.locator("#print-cl .cl-sig")).toHaveCount(1);
     });
+
+    test("profiles: legacy save becomes profile #1; new blank profile switches cleanly", async ({
+        page,
+    }) => {
+        await page.goto(fileUrl("app.html"));
+        // seed a legacy flat save (pre-slots shape)
+        await page.evaluate(() => {
+            localStorage.clear();
+            const legacy = {
+                version: 2,
+                info: { name: "Legacy Louise" },
+            };
+            localStorage.setItem("resume_builder_save", JSON.stringify(legacy));
+        });
+        await page.reload();
+
+        // migrated into slot #1 and applied
+        await expect(page.locator("#r-name")).toHaveValue("Legacy Louise");
+        const env = await page.evaluate(() =>
+            JSON.parse(localStorage.getItem("resume_builder_save")),
+        );
+        expect(env.slotsVersion).toBe(1);
+        expect(env.slots[0].data.info.name).toBe("Legacy Louise");
+
+        // create a blank second profile via the ⋯ menu
+        page.once("dialog", (d) => d.accept("Ops résumé"));
+        await page.click("#profile-switcher .slot-menu-btn");
+        await page.click('#profile-switcher .slot-menu button:text("New profile")');
+        await expect(page.locator("#r-name")).toHaveValue("");
+
+        // switch back — original content restored
+        const firstId = await page
+            .locator("#profile-switcher .slot-select option")
+            .first()
+            .getAttribute("value");
+        await page.selectOption("#profile-switcher .slot-select", firstId);
+        await expect(page.locator("#r-name")).toHaveValue("Legacy Louise");
+    });
 });
 
 test.describe("Flow", () => {
@@ -99,13 +137,80 @@ test.describe("Flow", () => {
         await page.fill("#srcSalary", "60000");
         await page.click("text=+ Add Source");
 
-        const blob = await page.evaluate(() =>
+        const env = await page.evaluate(() =>
             JSON.parse(localStorage.getItem("flow_save")),
         );
-        expect(blob.version).toBe(1);
-        expect(blob.incomes).toHaveLength(1);
+        expect(env.slotsVersion).toBe(1);
+        expect(env.slots).toHaveLength(1);
+        expect(env.slots[0].data.version).toBe(1);
+        expect(env.slots[0].data.incomes).toHaveLength(1);
 
         await page.reload();
+        await expect(page.locator("#srcList")).toContainText("Source 1");
+    });
+
+    test("pre-slots flat blob is wrapped as scenario #1", async ({ page }) => {
+        await page.evaluate(() => {
+            localStorage.clear();
+            localStorage.setItem(
+                "flow_save",
+                JSON.stringify({
+                    version: 1,
+                    incomes: [
+                        {
+                            id: 1,
+                            name: "Flat Blob Job",
+                            type: "salary",
+                            wage: 0,
+                            hours: 0,
+                            annualGross: 70000,
+                        },
+                    ],
+                    taxCfg: { country: "CA", region: "ON" },
+                    housing: { type: "none" },
+                    expenses: [],
+                    accounts: [],
+                    investments: [],
+                }),
+            );
+        });
+        await page.reload();
+
+        await expect(page.locator("#srcList")).toContainText("Flat Blob Job");
+        const env = await page.evaluate(() =>
+            JSON.parse(localStorage.getItem("flow_save")),
+        );
+        expect(env.slots).toHaveLength(1);
+        expect(env.slots[0].data.incomes[0].name).toBe("Flat Blob Job");
+    });
+
+    test("scenarios: create blank, switch back, data intact", async ({
+        page,
+    }) => {
+        // scenario 1 gets an income
+        await page.selectOption("#srcType", "salary");
+        await page.fill("#srcSalary", "60000");
+        await page.click("text=+ Add Source");
+        await expect(page.locator("#srcList")).toContainText("Source 1");
+
+        // create a blank second scenario via the ⋯ menu
+        page.once("dialog", (d) => d.accept("With raise"));
+        await page.click("#scenario-switcher .slot-menu-btn");
+        await page.click('#scenario-switcher .slot-menu button:text("New scenario")');
+
+        await expect(page.locator("#scenario-switcher .slot-select")).toHaveValue(
+            await page
+                .locator("#scenario-switcher .slot-select option:has-text('With raise')")
+                .getAttribute("value"),
+        );
+        await expect(page.locator("#srcList")).toContainText("No income added yet");
+
+        // switch back to scenario 1 — original data restored
+        const firstId = await page
+            .locator("#scenario-switcher .slot-select option")
+            .first()
+            .getAttribute("value");
+        await page.selectOption("#scenario-switcher .slot-select", firstId);
         await expect(page.locator("#srcList")).toContainText("Source 1");
     });
 
@@ -139,8 +244,8 @@ test.describe("Flow", () => {
             blob: JSON.parse(localStorage.getItem("flow_save")),
             oldKey: localStorage.getItem("flow_incomes"),
         }));
-        expect(migrated.blob.version).toBe(1);
-        expect(migrated.blob.expenses).toHaveLength(1);
+        expect(migrated.blob.slots[0].data.version).toBe(1);
+        expect(migrated.blob.slots[0].data.expenses).toHaveLength(1);
         expect(migrated.oldKey).toBeNull();
     });
 
