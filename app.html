@@ -4,7 +4,12 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Resume Studio · Folio</title>
+        <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23c4622d'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' font-weight='700' fill='%23fff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
+        <link rel="stylesheet" href="fonts/fonts.css" />
+        <link rel="stylesheet" href="css/base.css" />
         <link rel="stylesheet" href="style.css" />
+        <script src="js/shell.js"></script>
+        <script src="js/storage.js"></script>
     </head>
     <body>
         <div class="toast" id="toast"></div>
@@ -25,7 +30,7 @@
                 <button class="doc-tab active" onclick="switchDoc('resume')" title="Switch to Resume (Alt+1)">Resume</button>
                 <button class="doc-tab" onclick="switchDoc('coverletter')" title="Switch to Cover Letter (Alt+2)">Cover Letter</button>
                 <span class="pill-sep" aria-hidden="true">|</span>
-                <a class="pill-link" href="budget.html">Budget Studio</a>
+                <a class="pill-link" href="budget.html">Flow</a>
             </div>
             <div class="topbar-right">
                 <div class="strength-meter" id="strength-meter" title="Resume strength">
@@ -684,42 +689,21 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
             };
             const PAGE_RATIO = { letter: 11 / 8.5, a4: 297 / 210 };
 
-            /* ── TOAST ── */
-            function toast(msg, action) {
-                const el = document.getElementById("toast");
-                el.innerHTML = "";
-                const span = document.createElement("span");
-                span.textContent = msg;
-                el.appendChild(span);
-                if (action) {
-                    const b = document.createElement("button");
-                    b.className = "toast-action";
-                    b.textContent = action.label;
-                    b.onclick = () => {
-                        el.classList.remove("show");
-                        action.fn();
-                    };
-                    el.appendChild(b);
-                }
-                el.classList.add("show");
-                clearTimeout(el._t);
-                el._t = setTimeout(
-                    () => el.classList.remove("show"),
-                    action ? 4500 : 1800,
-                );
-            }
+            /* ── TOAST (shared impl in js/shell.js) ── */
+            const toast = Folio.toast;
 
             /* ── SAVE STATUS ── */
             function setSaveStatus(state) {
                 const wrap = document.getElementById("save-status");
                 const txt = document.getElementById("save-text");
-                if (state === "saving") {
-                    wrap.classList.add("saving");
-                    txt.textContent = "Saving…";
-                } else {
-                    wrap.classList.remove("saving");
-                    txt.textContent = "Saved";
-                }
+                wrap.classList.toggle("saving", state === "saving");
+                wrap.classList.toggle("error", state === "error");
+                txt.textContent =
+                    state === "saving"
+                        ? "Saving…"
+                        : state === "error"
+                          ? "Not saved!"
+                          : "Saved";
             }
 
             /* ── KEYBOARD SHORTCUTS ── */
@@ -727,8 +711,8 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                 const mod = e.ctrlKey || e.metaKey;
                 if (mod && e.key === "s") {
                     e.preventDefault();
-                    saveSnapshot();
-                    toast("saved ✓");
+                    if (saveSnapshot()) toast("saved ✓");
+                    else toast("couldn't save — browser storage may be full");
                 }
                 if (mod && e.key === "p") {
                     e.preventDefault();
@@ -758,8 +742,8 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                 setSaveStatus("saving");
                 clearTimeout(_saveTimer);
                 _saveTimer = setTimeout(() => {
-                    saveSnapshot();
-                    setSaveStatus("saved");
+                    if (saveSnapshot()) setSaveStatus("saved");
+                    else toast("couldn't save — browser storage may be full");
                 }, 600);
             }
 
@@ -797,10 +781,12 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
             }
 
             function saveSnapshot() {
-                localStorage.setItem(
+                const ok = Folio.store.write(
                     "resume_builder_save",
-                    JSON.stringify(collectData()),
+                    collectData(),
                 );
+                if (!ok) setSaveStatus("error");
+                return ok;
             }
 
             function applyData(d) {
@@ -860,11 +846,17 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
             }
 
             function loadSnapshot() {
+                const res = Folio.store.read("resume_builder_save");
+                if (!res.ok) {
+                    toast("couldn't restore your saved data — starting fresh");
+                    return;
+                }
+                if (!res.data) return;
                 try {
-                    const raw = localStorage.getItem("resume_builder_save");
-                    if (!raw) return;
-                    applyData(JSON.parse(raw));
-                } catch (e) {}
+                    applyData(res.data);
+                } catch (e) {
+                    toast("couldn't restore your saved data — starting fresh");
+                }
             }
 
             function setVal(id, val) {
@@ -1493,13 +1485,7 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
             }
 
             /* ── HELPERS ── */
-            function x(s) {
-                return (s || "")
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;");
-            }
+            const x = Folio.esc; // shared impl in js/shell.js
             function v(id) {
                 const el = document.getElementById(id);
                 return el ? el.value : "";
