@@ -13,6 +13,19 @@
     </head>
     <body>
         <div class="toast" id="toast"></div>
+        <div class="ats-overlay" id="ats-overlay" onclick="if(event.target===this)closeATS()">
+            <div class="ats-panel">
+                <div class="ats-head">
+                    <span>Plain text — what an ATS parser sees</span>
+                    <div style="display: flex; gap: 8px">
+                        <button class="data-btn" onclick="copyATS()">Copy</button>
+                        <button class="data-btn" onclick="downloadATS()">Download .txt</button>
+                        <button class="data-btn" onclick="closeATS()" aria-label="Close">✕</button>
+                    </div>
+                </div>
+                <pre id="ats-pre"></pre>
+            </div>
+        </div>
         <input
             type="file"
             id="import-file"
@@ -157,6 +170,18 @@
                             <span class="tab-count" id="tc-certs"></span>
                         </button>
                         <button
+                            class="section-tab"
+                            onclick="switchTab('extra')"
+                            data-tab="extra"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <path d="M12 8v8M8 12h8" />
+                            </svg>
+                            More
+                            <span class="tab-count" id="tc-extra"></span>
+                        </button>
+                        <button
                             class="section-tab tab-design"
                             onclick="switchTab('design')"
                             data-tab="design"
@@ -262,6 +287,17 @@ Motivated professional with experience across marketing coordination, administra
                             <button class="add-entry-btn" onclick="addJob()">
                                 + Add position
                             </button>
+                            <div id="lint-panel" style="display: none">
+                                <div class="design-label" style="margin-top: 18px">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="m9 12 2 2 4-4" />
+                                        <circle cx="12" cy="12" r="9" />
+                                    </svg>
+                                    Bullet check
+                                    <span class="label-hint">rule-based, runs locally</span>
+                                </div>
+                                <div id="lint-list"></div>
+                            </div>
                         </div>
 
                         <!-- EDUCATION -->
@@ -281,6 +317,22 @@ Motivated professional with experience across marketing coordination, administra
                                 style="margin-top: 8px"
                             >
                                 + Add category
+                            </button>
+                        </div>
+
+                        <!-- EXTRA SECTIONS -->
+                        <div class="editor-panel" id="tab-extra">
+                            <p class="design-note" style="margin: 0 0 12px">
+                                Custom sections — Projects, Volunteer,
+                                Languages, Awards — render in the résumé
+                                sidebar, styled to match your template.
+                            </p>
+                            <div id="extra-list"></div>
+                            <button
+                                class="add-entry-btn"
+                                onclick="addExtraSection()"
+                            >
+                                + Add section
                             </button>
                         </div>
 
@@ -406,6 +458,84 @@ Motivated professional with experience across marketing coordination, administra
                                         Roomy
                                     </button>
                                 </div>
+                            </div>
+                            <div class="design-group">
+                                <div class="design-label">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                                    </svg>
+                                    Page limit
+                                    <span class="label-hint">fit meter target</span>
+                                </div>
+                                <div class="seg" id="pages-seg">
+                                    <button data-pages="1" onclick="setPages(1)">
+                                        1 page
+                                    </button>
+                                    <button data-pages="2" onclick="setPages(2)">
+                                        2 pages
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="design-group">
+                                <div class="design-label">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M4 17V7l5 5 5-5v10M17 7h3m-3 5h3m-3 5h3" />
+                                    </svg>
+                                    ATS plain text
+                                </div>
+                                <div class="data-actions">
+                                    <button class="data-btn" onclick="showATS()">
+                                        ⌨ View as plain text
+                                    </button>
+                                </div>
+                                <p class="design-note">
+                                    Exactly what a résumé parser sees — copy it
+                                    into application portals that choke on PDFs.
+                                </p>
+                            </div>
+                            <div class="design-group">
+                                <div class="design-label">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <circle cx="11" cy="11" r="7" />
+                                        <path d="m21 21-4.3-4.3" />
+                                    </svg>
+                                    Keyword match
+                                    <span class="label-hint">runs locally</span>
+                                </div>
+                                <div class="field">
+                                    <label>Job description</label>
+                                    <textarea
+                                        id="kw-input"
+                                        class="tall"
+                                        placeholder="Paste the posting here — Folio compares it against your résumé. Nothing leaves your device."
+                                    ></textarea>
+                                </div>
+                                <div class="data-actions">
+                                    <button class="data-btn" onclick="matchKeywords()">
+                                        ✓ Check match
+                                    </button>
+                                </div>
+                                <div id="kw-results"></div>
+                            </div>
+                            <div class="design-group">
+                                <div class="design-label">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="9" />
+                                        <path d="M12 7v5l3 3" />
+                                    </svg>
+                                    Versions
+                                </div>
+                                <div class="data-actions">
+                                    <button class="data-btn" onclick="saveVersion()">
+                                        ＋ Save version
+                                    </button>
+                                </div>
+                                <div id="version-list"></div>
+                                <p class="design-note">
+                                    Named checkpoints, separate from autosave —
+                                    take one before a big rewrite.
+                                </p>
                             </div>
                             <div class="divider"></div>
                             <div class="design-group">
@@ -687,6 +817,7 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                 font: "sans",
                 pageSize: "letter",
                 density: "cozy",
+                pages: 1,
             };
             const PAGE_RATIO = { letter: 11 / 8.5, a4: 297 / 210 };
 
@@ -767,6 +898,7 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                     jobs: JSON.parse(JSON.stringify(jobs)),
                     skillGroups: JSON.parse(JSON.stringify(skillGroups)),
                     certs: [...certs],
+                    extraSections: JSON.parse(JSON.stringify(extraSections)),
                     cl: {
                         manager: v("cl-manager"),
                         company: v("cl-company"),
@@ -795,6 +927,7 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                         font: "sans",
                         pageSize: "letter",
                         density: "cozy",
+                        pages: 1,
                     },
                     info: {
                         name: "",
@@ -810,6 +943,7 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                     jobs: [],
                     skillGroups: [],
                     certs: [],
+                    extraSections: [],
                     cl: {
                         manager: "",
                         company: "",
@@ -837,6 +971,7 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                     if (d.design.font) design.font = d.design.font;
                     if (d.design.pageSize) design.pageSize = d.design.pageSize;
                     if (d.design.density) design.density = d.design.density;
+                    design.pages = d.design.pages || 1;
                 }
                 if (d.info) {
                     setVal("r-name", d.info.name);
@@ -873,6 +1008,9 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                     certs.length = 0;
                     d.certs.forEach((c) => certs.push(c));
                 }
+                extraSections.length = 0;
+                if (Array.isArray(d.extraSections))
+                    d.extraSections.forEach((s) => extraSections.push(s));
                 if (d.cl) {
                     setVal("cl-manager", d.cl.manager);
                     setVal("cl-company", d.cl.company);
@@ -1163,6 +1301,14 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                             b.dataset.density === design.density,
                         ),
                     );
+                document
+                    .querySelectorAll("#pages-seg button")
+                    .forEach((b) =>
+                        b.classList.toggle(
+                            "active",
+                            +b.dataset.pages === (design.pages || 1),
+                        ),
+                    );
                 // tint theme thumbnails with the chosen accent
                 document.querySelectorAll(".theme-thumb").forEach((t) => {
                     t.style.setProperty("--doc-accent", design.accent);
@@ -1200,20 +1346,21 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                 if (!width) return; // hidden (e.g. cover-letter view)
                 const pageH = width * (PAGE_RATIO[design.pageSize] || PAGE_RATIO.letter);
                 rp.style.minHeight = pageH + "px";
+                const target = design.pages || 1;
                 const pages = rp.scrollHeight / pageH;
-                if (pages <= 1.02) {
-                    meter.textContent = "✓ Fits 1 page";
+                if (pages <= target + 0.02) {
+                    meter.textContent = `✓ Fits ${target} page${target > 1 ? "s" : ""}`;
                     meter.className = "fit-meter ok";
                     edge.style.display = "none";
-                } else if (pages < 1.25) {
+                } else if (pages < target + 0.25) {
                     meter.textContent = "Slightly over — try Compact";
                     meter.className = "fit-meter warn";
-                    edge.style.top = pageH + "px";
+                    edge.style.top = pageH * target + "px";
                     edge.style.display = "block";
                 } else {
                     meter.textContent = `≈ ${pages.toFixed(1)} pages`;
                     meter.className = "fit-meter over";
-                    edge.style.top = pageH + "px";
+                    edge.style.top = pageH * target + "px";
                     edge.style.display = "block";
                 }
             }
@@ -1250,6 +1397,13 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                 syncDesignUI();
                 scheduleSave();
             }
+            function setPages(p) {
+                design.pages = p;
+                applyDesign();
+                syncDesignUI();
+                scheduleSave();
+                toast(`fit target: ${p} page${p > 1 ? "s" : ""}`);
+            }
 
             /* ── JOB EDITOR ── */
             function buildJobEditor() {
@@ -1279,7 +1433,7 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
           <div class="field"><label>Company</label><input value="${x(job.org)}" oninput="jobs[${i}].org=this.value;refreshCard(${i},null,this.value);renderResume()"></div>
           <div class="field"><label>Location</label><input value="${x(job.loc)}" oninput="jobs[${i}].loc=this.value;renderResume()"></div>
         </div>
-        <div class="field"><label>Bullets — one per line</label><textarea class="tall" oninput="jobs[${i}].bullets=this.value;renderResume()">${x(job.bullets)}</textarea></div>
+        <div class="field"><label>Bullets — one per line <span class="label-hint">**bold** _italic_</span></label><textarea class="tall" oninput="jobs[${i}].bullets=this.value;renderResume()">${x(job.bullets)}</textarea></div>
       </div>`;
                     list.appendChild(d);
                 });
@@ -1526,11 +1680,397 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                 });
             }
 
+            /* ── EXTRA SECTIONS EDITOR ── */
+            const extraSections = [];
+
+            function buildExtraEditor() {
+                const wrap = document.getElementById("extra-list");
+                wrap.innerHTML = "";
+                extraSections.forEach((sec, gi) => {
+                    const d = document.createElement("div");
+                    d.className = "job-card";
+                    d.style.marginBottom = "10px";
+                    const items = sec.items
+                        .map(
+                            (it, ii) => `
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <div style="flex:1;min-width:0">
+            <div class="grid-2">
+              <div class="field"><label>Name</label><input value="${x(it.name)}" oninput="extraSections[${gi}].items[${ii}].name=this.value;renderResume()"></div>
+              <div class="field"><label>Date / note</label><input value="${x(it.date)}" oninput="extraSections[${gi}].items[${ii}].date=this.value;renderResume()"></div>
+            </div>
+            <div class="field"><label>Detail <span class="label-hint">optional</span></label><input value="${x(it.detail)}" oninput="extraSections[${gi}].items[${ii}].detail=this.value;renderResume()"></div>
+          </div>
+          <button class="icon-btn del" style="margin-top:22px" onclick="removeExtraItem(${gi},${ii})" title="Remove entry">✕</button>
+        </div>`,
+                        )
+                        .join("");
+                    d.innerHTML = `
+      <div class="job-card-head">
+        <div class="job-card-info" style="display:flex;align-items:center;gap:6px;min-width:0;">
+          <input class="heading-input" value="${x(sec.title)}" oninput="extraSections[${gi}].title=this.value;renderResume()" placeholder="Section title — Projects, Volunteer…">
+        </div>
+        <div class="job-card-actions">
+          ${gi > 0 ? `<button class="icon-btn" onclick="moveExtraSection(${gi},-1)" title="Move up">↑</button>` : ""}
+          ${gi < extraSections.length - 1 ? `<button class="icon-btn" onclick="moveExtraSection(${gi},1)" title="Move down">↓</button>` : ""}
+          <button class="icon-btn del" onclick="removeExtraSection(${gi})" title="Remove section">✕</button>
+        </div>
+      </div>
+      <div class="job-card-body">
+        ${items}
+        <button class="add-entry-btn" style="margin-top:4px" onclick="addExtraItem(${gi})">+ Add entry</button>
+      </div>`;
+                    wrap.appendChild(d);
+                });
+            }
+            function addExtraSection() {
+                extraSections.push({
+                    title: "Projects",
+                    items: [{ name: "", detail: "", date: "" }],
+                });
+                buildExtraEditor();
+                renderResume();
+            }
+            function removeExtraSection(gi) {
+                const item = extraSections[gi];
+                extraSections.splice(gi, 1);
+                buildExtraEditor();
+                renderResume();
+                toast("section removed", {
+                    label: "Undo",
+                    fn: () => {
+                        extraSections.splice(gi, 0, item);
+                        buildExtraEditor();
+                        renderResume();
+                    },
+                });
+            }
+            function moveExtraSection(gi, dir) {
+                const j = gi + dir;
+                if (j < 0 || j >= extraSections.length) return;
+                [extraSections[gi], extraSections[j]] = [
+                    extraSections[j],
+                    extraSections[gi],
+                ];
+                buildExtraEditor();
+                renderResume();
+            }
+            function addExtraItem(gi) {
+                extraSections[gi].items.push({ name: "", detail: "", date: "" });
+                buildExtraEditor();
+                renderResume();
+            }
+            function removeExtraItem(gi, ii) {
+                const item = extraSections[gi].items[ii];
+                extraSections[gi].items.splice(ii, 1);
+                buildExtraEditor();
+                renderResume();
+                toast("entry removed", {
+                    label: "Undo",
+                    fn: () => {
+                        if (!extraSections[gi]) return;
+                        extraSections[gi].items.splice(ii, 0, item);
+                        buildExtraEditor();
+                        renderResume();
+                    },
+                });
+            }
+
+            /* ── ATS PLAIN TEXT ── */
+            function buildResumeText() {
+                const L = [];
+                const name = v("r-name").trim(),
+                    headline = v("r-headline").trim();
+                if (name) L.push(name.toUpperCase());
+                if (headline) L.push(headline);
+                const contact = [
+                    [v("r-city"), v("r-locrest")]
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                        .join(", "),
+                    v("r-phone").trim(),
+                    v("r-email").trim(),
+                    v("r-link").trim(),
+                ]
+                    .filter(Boolean)
+                    .join(" | ");
+                if (contact) L.push(contact);
+                if (v("r-summary").trim())
+                    L.push("", "SUMMARY", mdStrip(v("r-summary").trim()));
+                if (jobs.length) {
+                    L.push("", "WORK EXPERIENCE");
+                    jobs.forEach((j) => {
+                        L.push(
+                            "",
+                            [j.title, j.org].filter(Boolean).join(" — ") +
+                                (j.date ? ` (${j.date})` : ""),
+                        );
+                        if (j.loc) L.push(j.loc);
+                        j.bullets
+                            .split("\n")
+                            .filter((b) => b.trim())
+                            .forEach((b) => L.push("- " + mdStrip(b.trim())));
+                    });
+                }
+                if (eduList.length) {
+                    L.push("", "EDUCATION");
+                    eduList.forEach((e) =>
+                        L.push(
+                            [e.school, e.degree].filter(Boolean).join(" — ") +
+                                (e.date ? ` (${e.date})` : ""),
+                        ),
+                    );
+                }
+                if (skillGroups.some((g) => g.skills.length)) {
+                    L.push("", "SKILLS");
+                    skillGroups.forEach((g) => {
+                        if (g.skills.length)
+                            L.push(`${g.heading}: ${g.skills.join(", ")}`);
+                    });
+                }
+                if (certs.length) {
+                    L.push("", "CERTIFICATIONS");
+                    certs.forEach((c) => L.push("- " + c));
+                }
+                extraSections.forEach((sec) => {
+                    const items = sec.items.filter((it) =>
+                        (it.name || "").trim(),
+                    );
+                    if (!(sec.title || "").trim() || !items.length) return;
+                    L.push("", sec.title.trim().toUpperCase());
+                    items.forEach((it) =>
+                        L.push(
+                            "- " +
+                                [mdStrip(it.name), mdStrip(it.detail), it.date]
+                                    .filter(Boolean)
+                                    .join(" — "),
+                        ),
+                    );
+                });
+                return L.join("\n");
+            }
+            function showATS() {
+                document.getElementById("ats-pre").textContent =
+                    buildResumeText();
+                document.getElementById("ats-overlay").classList.add("open");
+            }
+            function closeATS() {
+                document
+                    .getElementById("ats-overlay")
+                    .classList.remove("open");
+            }
+            function copyATS() {
+                const text = document.getElementById("ats-pre").textContent;
+                const done = () => toast("copied to clipboard ✓");
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(done, () =>
+                        toast("couldn't copy — select the text manually"),
+                    );
+                } else {
+                    const ta = document.createElement("textarea");
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    try {
+                        document.execCommand("copy");
+                        done();
+                    } catch (e) {
+                        toast("couldn't copy — select the text manually");
+                    }
+                    ta.remove();
+                }
+            }
+            function downloadATS() {
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(
+                    new Blob([buildResumeText()], { type: "text/plain" }),
+                );
+                a.download =
+                    (v("r-name").trim() || "resume")
+                        .toLowerCase()
+                        .replace(/\s+/g, "-") + ".txt";
+                a.click();
+                URL.revokeObjectURL(a.href);
+            }
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") closeATS();
+            });
+
+            /* ── VERSIONS (named checkpoints, separate from autosave) ── */
+            const VERSIONS_KEY = "resume_versions";
+            function readVersions() {
+                const r = Folio.store.read(VERSIONS_KEY);
+                return r.ok && Array.isArray(r.data) ? r.data : [];
+            }
+            function saveVersion() {
+                const name = prompt(
+                    "Name this version:",
+                    `${profiles.active().name} — ${new Date().toLocaleDateString("en-CA")}`,
+                );
+                if (!name || !name.trim()) return;
+                const list = readVersions();
+                list.unshift({
+                    id: Date.now(),
+                    name: name.trim(),
+                    takenAt: Date.now(),
+                    data: collectData(),
+                });
+                if (list.length > 20) {
+                    list.length = 20;
+                    toast("version saved ✓ (keeping the 20 newest)");
+                } else toast("version saved ✓");
+                if (!Folio.store.write(VERSIONS_KEY, list))
+                    toast("couldn't save — browser storage may be full");
+                renderVersions();
+            }
+            function restoreVersion(id) {
+                const ver = readVersions().find((w) => w.id === id);
+                if (!ver) return;
+                if (
+                    !confirm(
+                        `Restore "${ver.name}"? This replaces the current content of this profile.`,
+                    )
+                )
+                    return;
+                applyData(ver.data);
+                rebuildAll();
+                toast("version restored ✓");
+            }
+            function deleteVersion(id) {
+                const list = readVersions();
+                const idx = list.findIndex((w) => w.id === id);
+                if (idx < 0) return;
+                const item = list[idx];
+                list.splice(idx, 1);
+                Folio.store.write(VERSIONS_KEY, list);
+                renderVersions();
+                toast("version deleted", {
+                    label: "Undo",
+                    fn: () => {
+                        const l = readVersions();
+                        l.splice(idx, 0, item);
+                        Folio.store.write(VERSIONS_KEY, l);
+                        renderVersions();
+                    },
+                });
+            }
+            function renderVersions() {
+                const el = document.getElementById("version-list");
+                const list = readVersions();
+                el.innerHTML = list
+                    .map(
+                        (ver) => `
+        <div class="version-row">
+          <div class="version-info">
+            <div class="version-name">${x(ver.name)}</div>
+            <div class="version-date">${new Date(ver.takenAt).toLocaleString("en-CA", { dateStyle: "medium", timeStyle: "short" })}</div>
+          </div>
+          <button class="icon-btn" onclick="restoreVersion(${ver.id})" title="Restore">↩</button>
+          <button class="icon-btn del" onclick="deleteVersion(${ver.id})" title="Delete">✕</button>
+        </div>`,
+                    )
+                    .join("");
+            }
+
+            /* ── BULLET LINT (rule-based, fully local) ── */
+            const WEAK_OPENERS =
+                /^(responsible for|worked on|helped with|duties included|tasked with|assisted with|in charge of|involved in)/i;
+            function updateLint() {
+                const panel = document.getElementById("lint-panel");
+                const list = document.getElementById("lint-list");
+                if (!panel || !list) return;
+                const hints = [];
+                jobs.forEach((j, ji) => {
+                    const label = x(j.title) || `Job ${ji + 1}`;
+                    const bullets = j.bullets
+                        .split("\n")
+                        .filter((b) => b.trim());
+                    let hasNumber = false;
+                    bullets.forEach((b, bi) => {
+                        const t = b.trim();
+                        if (/\d/.test(t)) hasNumber = true;
+                        if (WEAK_OPENERS.test(t))
+                            hints.push(
+                                `<b>${label}</b>, bullet ${bi + 1}: starts with “${x(t.split(/\s+/).slice(0, 2).join(" ").toLowerCase())}…” — lead with an action verb (Led, Built, Cut).`,
+                            );
+                        if (t.length > 220)
+                            hints.push(
+                                `<b>${label}</b>, bullet ${bi + 1}: very long — trim to one line of impact.`,
+                            );
+                    });
+                    if (bullets.length && !hasNumber)
+                        hints.push(
+                            `<b>${label}</b>: no numbers in any bullet — add a metric (%, $, team size, volume).`,
+                        );
+                });
+                panel.style.display = jobs.length ? "block" : "none";
+                list.innerHTML = hints.length
+                    ? hints
+                          .slice(0, 6)
+                          .map((h) => `<div class="lint-item">${h}</div>`)
+                          .join("")
+                    : `<div class="lint-item ok">✓ No red flags — bullets lead strong and carry numbers.</div>`;
+            }
+
+            /* ── KEYWORD MATCH (fully local) ── */
+            const KW_STOP = new Set(
+                "the and for with you your our are will that this have has can from able etc to in of a an on as by or be is at we they their who what when where why how job role work team not only all more than into across within out up about over under per each other some most least strong ability experience years plus".split(
+                    " ",
+                ),
+            );
+            function matchKeywords() {
+                const jd = document
+                    .getElementById("kw-input")
+                    .value.toLowerCase();
+                const out = document.getElementById("kw-results");
+                if (!jd.trim()) {
+                    out.innerHTML = `<p class="design-note" style="margin-top:8px">Paste a job description first.</p>`;
+                    return;
+                }
+                const resumeText = buildResumeText().toLowerCase();
+                const skills = skillGroups.flatMap((gr) => gr.skills);
+                const inJD = skills.filter((s) =>
+                    jd.includes(s.toLowerCase()),
+                );
+                const freq = {};
+                (jd.match(/[a-z][a-z+#./-]{2,}/g) || []).forEach((w) => {
+                    if (!KW_STOP.has(w)) freq[w] = (freq[w] || 0) + 1;
+                });
+                const missing = Object.entries(freq)
+                    .filter(([w, c]) => c >= 2 && !resumeText.includes(w))
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 12)
+                    .map(([w]) => w);
+                const chip = (t, cls) =>
+                    `<span class="kw-chip ${cls}">${x(t)}</span>`;
+                out.innerHTML = `
+        <p class="design-note" style="margin-top:10px">Your skills the posting mentions (${inJD.length}/${skills.length}):</p>
+        <div class="kw-wrap">${inJD.length ? inJD.map((s) => chip(s, "hit")).join("") : chip("none matched yet", "miss")}</div>
+        <p class="design-note" style="margin-top:10px">Frequent posting terms missing from your résumé:</p>
+        <div class="kw-wrap">${missing.length ? missing.map((w) => chip(w, "miss")).join("") : chip("nothing obvious missing ✓", "hit")}</div>`;
+            }
+
             /* ── HELPERS ── */
             const x = Folio.esc; // shared impl in js/shell.js
             function v(id) {
                 const el = document.getElementById(id);
                 return el ? el.value : "";
+            }
+
+            /* mini-markdown: **bold** and _italic_ — escapes first, so safe */
+            function md(s) {
+                return x(s)
+                    .replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>")
+                    .replace(
+                        /(^|[\s(])_([^_\n]+)_(?=[\s).,;:!?]|$)/g,
+                        "$1<i>$2</i>",
+                    );
+            }
+            /* strip the same markers for plain-text output */
+            function mdStrip(s) {
+                return String(s || "")
+                    .replace(/\*\*([^*\n]+)\*\*/g, "$1")
+                    .replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,;:!?]|$)/g, "$1$2");
             }
 
             /* ── RESUME HTML ── */
@@ -1570,14 +2110,14 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                     ? `<div class="rp-headline">${x(headline)}</div>`
                     : "";
                 const summaryHTML = summary.trim()
-                    ? `<div class="rp-summary-wrap"><div class="rp-section-label">Summary</div><p class="rp-summary">${x(summary).replace(/\n/g, "<br>")}</p></div>`
+                    ? `<div class="rp-summary-wrap"><div class="rp-section-label">Summary</div><p class="rp-summary">${md(summary).replace(/\n/g, "<br>")}</p></div>`
                     : "";
                 const jobsHTML = jobs
                     .map((j) => {
                         const bl = j.bullets
                             .split("\n")
                             .filter((b) => b.trim())
-                            .map((b) => `<li>${x(b.trim())}</li>`)
+                            .map((b) => `<li>${md(b.trim())}</li>`)
                             .join("");
                         return `<div class="rp-entry"><div class="rp-row"><span class="rp-title">${x(j.title)}</span><span class="rp-date">${x(j.date)}</span></div><div class="rp-org">${[x(j.org), x(j.loc)].filter(Boolean).join(" · ")}</div><ul class="rp-bullets">${bl}</ul></div>`;
                     })
@@ -1600,10 +2140,29 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                           )
                           .join("")}</div>`
                     : "";
+                // custom sections reuse the edu item classes so all ten
+                // templates style them without any per-theme CSS
+                const extraHTML = extraSections
+                    .filter(
+                        (sec) =>
+                            (sec.title || "").trim() &&
+                            sec.items.some((it) => (it.name || "").trim()),
+                    )
+                    .map(
+                        (sec) =>
+                            `<div class="rp-section"><div class="rp-section-label">${x(sec.title)}</div>${sec.items
+                                .filter((it) => (it.name || "").trim())
+                                .map(
+                                    (it) =>
+                                        `<div class="rp-edu-item"><div class="rp-edu-school">${md(it.name)}</div>${it.detail ? `<div class="rp-edu-deg">${md(it.detail)}</div>` : ""}${it.date ? `<div class="rp-edu-date">${x(it.date)}</div>` : ""}</div>`,
+                                )
+                                .join("")}</div>`,
+                    )
+                    .join("");
                 return `<div class="rp-header"><div class="rp-name">${x(name)}</div>${headlineHTML}<div class="rp-contact">${contact}</div></div>
     ${summaryHTML}
     <div class="rp-body"><main><div class="rp-section"><div class="rp-section-label">Work Experience</div>${jobsHTML}</div></main>
-    <aside>${eduHTML}${skillsHTML}${certsHTML}<div class="rp-refs">References available upon request.</div></aside></div>`;
+    <aside>${eduHTML}${skillsHTML}${certsHTML}${extraHTML}<div class="rp-refs">References available upon request.</div></aside></div>`;
             }
 
             /* ── CL HTML ── */
@@ -1687,7 +2246,7 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
     ${recipientHTML}
     ${subjectHTML}
     <div class="cl-salutation">Dear ${x(greeting)},</div>
-    <div class="cl-body">${x(fullBody)}</div>
+    <div class="cl-body">${md(fullBody)}</div>
     <div class="cl-closing">${x(val)},</div>
     <div class="cl-sig">${x(name)}</div>`;
             }
@@ -1706,6 +2265,7 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                 updateFit();
                 updateResumeStrength();
                 updateTabCounts();
+                updateLint();
                 scheduleSave();
             }
 
@@ -1753,6 +2313,10 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                     skillGroups.reduce((s, g) => s + g.skills.length, 0),
                 );
                 setCount("tc-certs", certs.length);
+                setCount(
+                    "tc-extra",
+                    extraSections.reduce((s, g) => s + g.items.length, 0),
+                );
             }
 
             function renderCL() {
@@ -1767,6 +2331,7 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
                 buildEduEditor();
                 buildSkillEditor();
                 buildCertEditor();
+                buildExtraEditor();
                 applyDesign();
                 syncDesignUI();
                 renderResume();
@@ -1776,6 +2341,8 @@ I would welcome the opportunity to discuss how my background fits your needs. Th
             /* ── INIT ── */
             loadSnapshot();
             buildDesignPanel();
+            buildExtraEditor();
+            renderVersions();
             buildJobEditor();
             buildEduEditor();
             buildSkillEditor();

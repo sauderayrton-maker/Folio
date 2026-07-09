@@ -1,5 +1,34 @@
 # Changelog
 
+## Phase 2e — Resume Studio depth pass (2026-07-03)
+
+Completes the Phase 2 Resume Studio items from `handoff.md`:
+
+- **Custom sections** ("More" tab): Projects, Volunteer, Languages, Awards —
+  any titled section with name/detail/date entries, reorderable, rendered in
+  the résumé sidebar using the same classes every template already styles.
+- **ATS plain-text mode**: a modal showing exactly what a résumé parser
+  sees, with copy-to-clipboard and .txt download. Markdown stripped, section
+  headers uppercased.
+- **Versions**: named checkpoints (kept to 20) separate from autosave —
+  save one before a big rewrite, restore with confirmation, delete with undo.
+- **Bullet check**: rule-based lint under the Experience tab — flags weak
+  openers ("Responsible for…"), bullets with no metrics, and overlong
+  bullets. Fully local.
+- **Keyword match**: paste a job description, see which of your skills it
+  mentions and which frequent posting terms your résumé is missing. Fully
+  local.
+- **Mini-markdown**: `**bold**` and `_italic_` in bullets, summary, and the
+  cover letter body (escapes first — no HTML injection).
+- **2-page fit target**: a Design-tab toggle so the fit meter praises a
+  clean two-pager instead of nagging about it.
+
+Deliberately skipped, with reasons: whole-section reorder/show-hide (all
+ten templates hard-code the main/aside split — custom sections cover the
+need without per-template surgery) and font-size/margin fine controls
+(themes set sizes in px at many levels; Density already covers the
+squeeze-to-fit case).
+
 ## Phase 2d — Flow finishing pass (2026-07-03)
 
 Completes the remaining Phase 2 Flow items from `handoff.md`:

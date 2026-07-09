@@ -4,17 +4,20 @@ _Written 2026-07-02, expanded same day. v2 adds decisions 11–24, audit
 findings §3.5, and Phases 5–6. Treat it as the source of truth until
 superseded by a newer handoff._
 
-> **Status 2026-07-03: Phases 1, 2a, 2b, and 2c are shipped** — see
-> `CHANGELOG.md`. 2a = shared slots utility (#15) + résumé profiles +
-> budget scenarios. 2b = Offer Compare (#16), cross-region, rent-adjusted.
-> 2c = debt payoff planner (avalanche/snowball with rolling payments,
-> strategy-comparison chart) + net-worth rollup, with debt payments wired
-> into every dashboard view. 15 Playwright smoke tests pass, including a
-> zero-external-requests check. §3 findings addressed by Phase 1 are
-> historical. Remaining Phase 2: Resume Studio depth (custom sections, ATS
-> plain-text mode, snapshot history, bullet linting, keyword match) and
-> smaller Flow items (emergency-fund meter, 50/30/20, inflation toggle,
-> FIRE panel, rent-vs-buy, paycheck calendar, CSV, keyboard parity).
+> **Status 2026-07-03: Phases 1 and 2 (a–e) are fully shipped** — see
+> `CHANGELOG.md` for the per-phase details. Phase 2 delivered: shared slots
+> (#15) + résumé profiles + budget scenarios (2a), Offer Compare (#16, 2b),
+> debt payoff + net worth (2c), the Flow finishing pass — 50/30/20,
+> emergency runway, FIRE panel, inflation toggle, rent-vs-buy, paycheck
+> calendar, CSV, keyboard parity, example budget (2d) — and the Resume
+> Studio depth pass — custom sections, ATS plain text, versions, bullet
+> lint, keyword match, mini-markdown, 2-page fit target (2e). 18 Playwright
+> smoke tests pass, including a zero-external-requests check.
+>
+> Two Phase-2 items were deliberately skipped with reasons recorded in the
+> Phase 2e changelog entry (section reorder/show-hide; typography fine
+> controls). Currency-display setting (#19) also remains. **Next up:
+> Phase 3 — the Job Application Tracker studio.**
 
 ---
 

@@ -55,6 +55,71 @@ test.describe("Resume Studio", () => {
         await expect(page.locator("#r-name")).toHaveValue("Persisted Person");
     });
 
+    test("depth pass: markdown, custom sections, ATS text, versions, lint", async ({
+        page,
+    }) => {
+        const errors = trackErrors(page);
+        await page.goto(fileUrl("app.html"));
+
+        // mini-markdown renders bold in the preview
+        await page.fill("#r-summary", "Shipped **big** things, _quietly_.");
+        await expect(page.locator("#rp .rp-summary b")).toHaveText("big");
+        await expect(page.locator("#rp .rp-summary i")).toHaveText("quietly");
+
+        // custom section flows into the sidebar
+        await page.click('.section-tab[data-tab="extra"]');
+        await page.click("text=+ Add section");
+        await page.fill("#extra-list .heading-input", "Volunteer");
+        await page.fill(
+            "#extra-list .job-card-body input >> nth=0",
+            "Food bank crew lead",
+        );
+        await expect(page.locator("#rp")).toContainText("Volunteer");
+        await expect(page.locator("#rp")).toContainText("Food bank crew lead");
+
+        // bullet lint flags the numberless sample job
+        await page.click('.section-tab[data-tab="exp"]');
+        await expect(page.locator("#lint-list .lint-item").first()).toBeVisible();
+
+        // ATS plain text: markdown stripped, sections present
+        await page.click('.section-tab[data-tab="design"]');
+        await page.click("text=View as plain text");
+        const ats = await page.locator("#ats-pre").textContent();
+        expect(ats).toContain("WORK EXPERIENCE");
+        expect(ats).toContain("VOLUNTEER");
+        expect(ats).toContain("Shipped big things");
+        expect(ats).not.toContain("**");
+        await page.keyboard.press("Escape");
+        await expect(page.locator("#ats-overlay")).not.toHaveClass(/open/);
+
+        // versions: save a named checkpoint, then restore it after an edit
+        page.once("dialog", (d) => d.accept("before rewrite"));
+        await page.click("text=＋ Save version");
+        await expect(page.locator(".version-name")).toHaveText(
+            "before rewrite",
+        );
+        await page.click('.section-tab[data-tab="info"]');
+        await page.fill("#r-name", "Someone Else");
+        await page.click('.section-tab[data-tab="design"]');
+        page.once("dialog", (d) => d.accept()); // confirm restore
+        await page.click('.version-row button[title="Restore"]');
+        await expect(page.locator("#r-name")).toHaveValue("Alex Morgan");
+
+        // 2-page fit target
+        await page.click('#pages-seg button[data-pages="2"]');
+        await expect(page.locator("#fit-meter")).toContainText("2 page");
+
+        // keyword match runs locally
+        await page.fill(
+            "#kw-input",
+            "Seeking kubernetes kubernetes experience and communication communication skills",
+        );
+        await page.click("text=✓ Check match");
+        await expect(page.locator(".kw-chip").first()).toBeVisible();
+
+        expect(errors).toEqual([]);
+    });
+
     test("print layer is populated for PDF export", async ({ page }) => {
         await page.goto(fileUrl("app.html"));
         await expect(page.locator("#print-rp .rp-name")).toHaveCount(1);
