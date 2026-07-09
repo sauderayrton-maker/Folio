@@ -4,15 +4,17 @@ _Written 2026-07-02, expanded same day. v2 adds decisions 11–24, audit
 findings §3.5, and Phases 5–6. Treat it as the source of truth until
 superseded by a newer handoff._
 
-> **Status 2026-07-03: Phases 1, 2a, and 2b are shipped** — see
+> **Status 2026-07-03: Phases 1, 2a, 2b, and 2c are shipped** — see
 > `CHANGELOG.md`. 2a = shared slots utility (#15) + résumé profiles +
-> budget scenarios, with all legacy storage formats migrating forward.
-> 2b = Offer Compare (#16): a fifth Flow tab comparing two comp packages
-> cross-region through the real tax engine, rent-adjusted. 14 Playwright
-> smoke tests pass, including a zero-external-requests check. §3 findings
-> addressed by Phase 1 are historical. Next up (pick one): debt payoff +
-> net-worth rollup (Flow), or the Resume Studio depth items — custom
-> sections, ATS plain-text mode, snapshot history.
+> budget scenarios. 2b = Offer Compare (#16), cross-region, rent-adjusted.
+> 2c = debt payoff planner (avalanche/snowball with rolling payments,
+> strategy-comparison chart) + net-worth rollup, with debt payments wired
+> into every dashboard view. 15 Playwright smoke tests pass, including a
+> zero-external-requests check. §3 findings addressed by Phase 1 are
+> historical. Remaining Phase 2: Resume Studio depth (custom sections, ATS
+> plain-text mode, snapshot history, bullet linting, keyword match) and
+> smaller Flow items (emergency-fund meter, 50/30/20, inflation toggle,
+> FIRE panel, rent-vs-buy, paycheck calendar, CSV, keyboard parity).
 
 ---
 

@@ -274,6 +274,44 @@ test.describe("Flow", () => {
         await expect(page.locator(".oc-verdict")).toContainText("Offer A");
     });
 
+    test("debt payoff: plan, dashboard integration, persistence", async ({
+        page,
+    }) => {
+        await page.click('.section-tab[data-tab="debt"]');
+        await page.fill("#debtName", "Visa");
+        await page.fill("#debtBalance", "3000");
+        await page.fill("#debtRate", "19.99");
+        await page.fill("#debtMin", "150");
+        await page.click("text=+ Add Debt");
+        await page.fill("#debtName", "Car loan");
+        await page.fill("#debtBalance", "12000");
+        await page.fill("#debtRate", "6.5");
+        await page.fill("#debtMin", "300");
+        await page.click("text=+ Add Debt");
+        await page.fill("#debtExtra", "200");
+
+        await expect(page.locator("#debtCount")).toHaveText("2 debts");
+        // payoff card: totals, timeline, strategy comparison
+        await expect(page.locator("#debtStats")).toContainText("Debt-free in");
+        await expect(page.locator("#debtStats")).toContainText("Interest paid");
+        await expect(page.locator("#debtProjList")).toContainText("Visa");
+        // summary shows monthly outlay: 150 + 300 min + 200 extra
+        await expect(page.locator("#smDbt")).toHaveText("$650.00");
+        // net worth is negative with only debts
+        await expect(page.locator("#netWorthVal")).toContainText("15.0k");
+
+        // strategy toggle updates the plan header
+        await page.click("#ds-snowball");
+        await expect(page.locator("#debt-sub")).toContainText("snowball");
+
+        // survives reload inside the scenario blob
+        await page.reload();
+        await page.click('.section-tab[data-tab="debt"]');
+        await expect(page.locator("#debtCount")).toHaveText("2 debts");
+        await expect(page.locator("#debtExtra")).toHaveValue("200");
+        await expect(page.locator("#debt-sub")).toContainText("snowball");
+    });
+
     test("removing an expense offers working Undo", async ({ page }) => {
         await page.click('.section-tab[data-tab="spending"]');
         await page.fill("#expName", "Groceries");

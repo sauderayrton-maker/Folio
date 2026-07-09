@@ -1,5 +1,25 @@
 # Changelog
 
+## Phase 2c — Debt payoff planner + net worth (2026-07-03)
+
+Implements the debt payoff + net-worth items from Phase 2 of `handoff.md`.
+
+- **New "Debt" tab in Flow**: track debts (balance, APR, minimum payment),
+  pick avalanche or snowball, and set an extra monthly amount.
+- **Payoff plan card** on the dashboard: month-by-month simulation with
+  rolling payments (paid-off minimums attack the next debt), total interest,
+  debt-free date, per-debt payoff timing, and a trajectory chart comparing
+  the active strategy against the alternative — including exactly how much
+  more the other strategy would cost.
+- **Net worth today** (savings + investment balances − debt balances) shown
+  on the payoff card, colored by sign.
+- Debt payments are now part of the real monthly picture: committed amount,
+  cash-flow bar, summary columns (new "Debt payments" row), allocation
+  donut, and the by-item chart all include them.
+- A visible warning when payments don't cover interest (balances would
+  never reach zero).
+- Deleting a debt gets the same undo toast as every other list.
+
 ## Phase 2b — Offer Compare (2026-07-03)
 
 Implements decision #16 of `handoff.md`.

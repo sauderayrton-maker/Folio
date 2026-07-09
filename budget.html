@@ -305,6 +305,9 @@
                     <button class="section-tab" onclick="switchTab('spending')" data-tab="spending">
                         <svg viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13 5.4 5M7 13l-2 9m12-9 2 9M9 21h6"/></svg>Spending
                     </button>
+                    <button class="section-tab" onclick="switchTab('debt')" data-tab="debt">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Debt
+                    </button>
                     <button class="section-tab" onclick="switchTab('savings')" data-tab="savings">
                         <svg viewBox="0 0 24 24"><path d="M19 7c0-1.1-.9-2-2-2H7c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V7z"/><path d="M9 11v4m6-4v4m-3-7v10"/></svg>Savings
                     </button>
@@ -467,6 +470,40 @@
                         </div>
 
                     </div><!-- /tab-spending -->
+
+                    <!-- ── DEBT TAB ── -->
+                    <div class="tab-section" id="tab-debt">
+
+                        <div class="form-block">
+                            <div class="block-label">Add a debt</div>
+                            <div class="field" id="f-debtName"><label>Name</label><input type="text" id="debtName" placeholder="Credit card, car loan, student loan…" onkeydown="if(event.key==='Enter') addDebt()" /></div>
+                            <div class="field-row">
+                                <div class="field" id="f-debtBalance"><label>Balance ($)</label><input type="number" id="debtBalance" placeholder="8500" min="0" step="100" /></div>
+                                <div class="field" id="f-debtRate"><label>APR (%)</label><input type="number" id="debtRate" placeholder="19.99" min="0" max="100" step="0.01" /></div>
+                            </div>
+                            <div class="field" id="f-debtMin"><label>Minimum payment ($/mo)</label><input type="number" id="debtMin" placeholder="250" min="0" step="10" onkeydown="if(event.key==='Enter') addDebt()" /></div>
+                            <button class="btn btn-primary btn-full" onclick="addDebt()">+ Add Debt</button>
+                        </div>
+
+                        <div class="form-block">
+                            <div class="block-label">Payoff strategy</div>
+                            <div class="housing-toggle">
+                                <button class="housing-btn active" id="ds-avalanche" onclick="setDebtStrategy('avalanche')">Avalanche</button>
+                                <button class="housing-btn" id="ds-snowball" onclick="setDebtStrategy('snowball')">Snowball</button>
+                            </div>
+                            <p class="tax-note" style="margin-top:0;margin-bottom:10px">Avalanche pays highest rate first (cheapest overall). Snowball pays smallest balance first (quickest wins). Paid-off minimums roll into the next debt either way.</p>
+                            <div class="field"><label>Extra toward debt ($/mo) <span class="field-hint">on top of minimums</span></label><input type="number" id="debtExtra" placeholder="0" min="0" step="25" oninput="onDebtCfgChange()" /></div>
+                        </div>
+
+                        <div class="form-block">
+                            <div class="list-hdr">
+                                <div class="block-label">Your debts</div>
+                                <span class="list-count" id="debtCount">0 debts</span>
+                            </div>
+                            <div class="list-scroll" id="debtList"><div class="empty-msg"><strong>No debts tracked</strong>Add credit cards, loans, or anything with a balance and a rate.</div></div>
+                        </div>
+
+                    </div><!-- /tab-debt -->
 
                     <!-- ── SAVINGS TAB ── -->
                     <div class="tab-section" id="tab-savings">
@@ -683,6 +720,7 @@
                                 <div class="srow"><span class="slabel">Taxes paid</span>  <span class="cr" id="smT">$0.00</span></div>
                                 <div class="srow"><span class="slabel">Housing</span>     <span class="cr" id="smH">$0.00</span></div>
                                 <div class="srow"><span class="slabel">Expenses</span>    <span class="cr" id="smE">$0.00</span></div>
+                                <div class="srow"><span class="slabel">Debt payments</span><span class="cr" id="smDbt">$0.00</span></div>
                                 <div class="srow"><span class="slabel">Goals &amp; invest</span><span class="cw" id="smA">$0.00</span></div>
                                 <div class="stotal"><span class="slabel">Remaining</span> <span id="smR">$0.00</span></div>
                                 <div class="prog-wrap"><div class="prog-bar" id="pmB" style="width:0%"></div></div>
@@ -694,6 +732,7 @@
                                 <div class="srow"><span class="slabel">Taxes paid</span>  <span class="cr" id="sbT">$0.00</span></div>
                                 <div class="srow"><span class="slabel">Housing</span>     <span class="cr" id="sbH">$0.00</span></div>
                                 <div class="srow"><span class="slabel">Expenses</span>    <span class="cr" id="sbE">$0.00</span></div>
+                                <div class="srow"><span class="slabel">Debt payments</span><span class="cr" id="sbDbt">$0.00</span></div>
                                 <div class="srow"><span class="slabel">Goals &amp; invest</span><span class="cw" id="sbA">$0.00</span></div>
                                 <div class="stotal"><span class="slabel">Remaining</span> <span id="sbR">$0.00</span></div>
                                 <div class="prog-wrap"><div class="prog-bar" id="pbB" style="width:0%"></div></div>
@@ -705,11 +744,24 @@
                                 <div class="srow"><span class="slabel">Taxes paid</span>  <span class="cr" id="syT">$0.00</span></div>
                                 <div class="srow"><span class="slabel">Housing</span>     <span class="cr" id="syH">$0.00</span></div>
                                 <div class="srow"><span class="slabel">Expenses</span>    <span class="cr" id="syE">$0.00</span></div>
+                                <div class="srow"><span class="slabel">Debt payments</span><span class="cr" id="syDbt">$0.00</span></div>
                                 <div class="srow"><span class="slabel">Goals &amp; invest</span><span class="cw" id="syA">$0.00</span></div>
                                 <div class="stotal"><span class="slabel">Remaining</span> <span id="syR">$0.00</span></div>
                                 <div class="prog-wrap"><div class="prog-bar" id="pyB" style="width:0%"></div></div>
                                 <div class="prog-label"><span>committed of net</span><span id="pyP">0%</span></div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="proj-card" id="debt-card">
+                        <div class="proj-card-hdr" style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">
+                            <div class="rp-section-hdr" style="margin-bottom:0"><h2>Debt payoff</h2><p id="debt-sub">avalanche · rolling payments</p></div>
+                            <div style="text-align:right"><div class="proj-cell-label">Net worth today</div><div class="proj-cell-val" id="netWorthVal" style="font-size:15px">—</div></div>
+                        </div>
+                        <div id="debtStats"><div class="proj-empty"><strong>No debts tracked</strong>Add debts on the Debt tab — Flow builds an avalanche/snowball payoff plan and shows your true net worth.</div></div>
+                        <div id="debtProjList"></div>
+                        <div class="chart-wrap chart-wrap-tall" id="debtChartWrap" style="margin-top:14px;display:none">
+                            <canvas id="debtChart"></canvas>
                         </div>
                     </div>
 
@@ -802,6 +854,7 @@
         const COLORS = ['#c4622d','#d4874a','#c4962d','#6b9c6b','#6a9ab8','#b87060','#9ab870','#c4a840','#8a6ab8','#b89060','#78a888','#b05526'];
         const ACCT_COLORS = ['rgba(107,156,107,.85)','rgba(106,154,184,.85)','rgba(196,150,45,.85)','rgba(138,106,184,.85)','rgba(120,168,136,.85)'];
         const INV_COLORS  = ['rgba(106,154,184,.9)','rgba(138,106,184,.9)','rgba(196,150,45,.9)','rgba(107,156,107,.9)','rgba(184,112,96,.9)'];
+        const DEBT_COLORS = ['rgba(184,90,69,.9)','rgba(196,150,45,.9)','rgba(160,80,55,.9)','rgba(138,106,184,.9)','rgba(106,154,184,.9)'];
         const TT = { backgroundColor:'rgba(20,14,8,.95)', borderColor:'rgba(200,170,120,.16)', borderWidth:1, titleColor:'#f0e8d8', bodyColor:'#a89880', padding:12, cornerRadius:8, displayColors:true };
         Chart.defaults.color = '#6a5c48';
         Chart.defaults.font.family = '"Inter", system-ui, sans-serif';
@@ -820,9 +873,12 @@
         let investments = [];
         let income      = {};
         let offerCompare = { a: blankOffer(), b: blankOffer() };
+        let debts       = [];
+        let debtCfg     = { strategy: 'avalanche', extra: 0 };
         let listView    = 'monthly';
         let chartView   = 'monthly';
         let donutChart    = null;
+        let debtChart     = null;
         let barChart      = null;
         let wealthChart   = null;
         let yearCmpChart  = null;
@@ -872,7 +928,7 @@
         }
 
         function collectBlob() {
-            return { version: 1, incomes, taxCfg, housing, expenses, accounts, investments, offerCompare };
+            return { version: 1, incomes, taxCfg, housing, expenses, accounts, investments, offerCompare, debts, debtCfg };
         }
 
         function blankFlowData() {
@@ -883,6 +939,8 @@
                 housing: { type: 'none', rent: 0, price: 450000, downPct: 10, rate: 6.5, years: 25 },
                 expenses: [], accounts: [], investments: [],
                 offerCompare: { a: blankOffer(), b: blankOffer() },
+                debts: [],
+                debtCfg: { strategy: 'avalanche', extra: 0 },
             };
         }
 
@@ -901,6 +959,8 @@
                 a: { ...blankOffer(), ...(d.offerCompare && d.offerCompare.a) },
                 b: { ...blankOffer(), ...(d.offerCompare && d.offerCompare.b) },
             };
+            debts   = Array.isArray(d.debts) ? d.debts : [];
+            debtCfg = { strategy: 'avalanche', extra: 0, ...(d.debtCfg || {}) };
         }
 
         function restore() {
@@ -1248,9 +1308,10 @@
 
             const mHousing = getHousingMonthly();
             const mExp  = expenses.reduce((s,e)=>s+toMonthly(e),0);
+            const mDebt = monthlyDebtOutlay();
             const mSav  = accounts.reduce((s,a)=>s+income.mNet*a.allocationPct/100,0);
             const mInv  = investments.reduce((s,i)=>s+i.monthly,0);
-            const mComm = mHousing + mExp + mSav + mInv;
+            const mComm = mHousing + mExp + mDebt + mSav + mInv;
             const mRem  = income.mNet - mComm;
             const pct   = income.mNet>0 ? mComm/income.mNet*100 : 0;
 
@@ -1269,7 +1330,7 @@
             else              { dot.className='health-dot healthy'; remEl.className='cf-num-value healthy';setText('cf-remaining-sub','looking good'); }
 
             const gBase = income.mGross || 1;
-            const taxPct = income.mTax/gBase*100, expPct=(mHousing+mExp)/gBase*100, savPct=(mSav+mInv)/gBase*100;
+            const taxPct = income.mTax/gBase*100, expPct=(mHousing+mExp+mDebt)/gBase*100, savPct=(mSav+mInv)/gBase*100;
             g('cf-bar-tax').style.width = taxPct+'%';
             g('cf-bar-expenses').style.left  = taxPct+'%';
             g('cf-bar-expenses').style.width = expPct+'%';
@@ -1314,6 +1375,192 @@
                 const FREQ={monthly:'mo',biweekly:'2wk',yearly:'yr'};
                 return `<div class="eitem"><span class="edot" style="background:${color}"></span><span class="ename">${esc(e.name)}</span><span class="ebadge">${FREQ[e.freq]}</span><div class="eamt-wrap"><div class="eamt">${fmt(disp)}<span class="eamt-unit">/${unit}</span></div><div class="esub">${fmt(alt)}/${altUnit}</div></div><button class="btn btn-del" onclick="removeExpense(${e.id})">✕</button></div>`;
             }).join('');
+        }
+
+        // ── Debts ─────────────────────────────────────────────────────────────
+        function monthlyDebtOutlay() {
+            return debts.length
+                ? debts.reduce((s,d)=>s+(d.minPayment||0),0) + (debtCfg.extra||0)
+                : 0;
+        }
+
+        function addDebt() {
+            const name = g('debtName').value.trim();
+            const balance = parseFloat(g('debtBalance').value);
+            const rate = parseFloat(g('debtRate').value);
+            const minPayment = parseFloat(g('debtMin').value);
+            if (!name) flashInvalid('f-debtName');
+            if (isNaN(balance)||balance<=0) flashInvalid('f-debtBalance');
+            if (isNaN(rate)||rate<0) flashInvalid('f-debtRate');
+            if (isNaN(minPayment)||minPayment<=0) flashInvalid('f-debtMin');
+            if (!name||isNaN(balance)||balance<=0||isNaN(rate)||rate<0||isNaN(minPayment)||minPayment<=0) return;
+            debts.push({ id:Date.now(), name, balance, ratePct:rate, minPayment });
+            g('debtName').value=''; g('debtBalance').value=''; g('debtRate').value=''; g('debtMin').value='';
+            persist(); renderDebts(); renderHero(); renderSummary(); updateCharts();
+        }
+
+        function removeDebt(id) {
+            const idx = debts.findIndex(d=>d.id===id);
+            if (idx < 0) return;
+            const item = debts[idx];
+            debts.splice(idx, 1);
+            persist(); renderDebts(); renderHero(); renderSummary(); updateCharts();
+            Folio.toast('debt removed', { label:'Undo', fn: () => {
+                debts.splice(idx, 0, item);
+                persist(); renderDebts(); renderHero(); renderSummary(); updateCharts();
+            }});
+        }
+
+        function setDebtStrategy(s) {
+            debtCfg.strategy = s;
+            g('ds-avalanche').classList.toggle('active', s==='avalanche');
+            g('ds-snowball').classList.toggle('active', s==='snowball');
+            persist(); updateCharts();
+        }
+
+        function onDebtCfgChange() {
+            debtCfg.extra = parseFloat(g('debtExtra').value) || 0;
+            persist(); renderHero(); renderSummary(); updateCharts();
+        }
+
+        function renderDebts() {
+            const list = g('debtList');
+            setText('debtCount', `${debts.length} debt${debts.length!==1?'s':''}`);
+            if (!debts.length) {
+                list.innerHTML = `<div class="empty-msg"><strong>No debts tracked</strong>Add credit cards, loans, or anything with a balance and a rate.</div>`;
+                return;
+            }
+            list.innerHTML = debts.map((d,i)=>{
+                const color = DEBT_COLORS[i%DEBT_COLORS.length];
+                return `<div class="eitem"><span class="edot" style="background:${color}"></span><span class="ename">${esc(d.name)}</span><span class="ebadge">${d.ratePct}%</span><div class="eamt-wrap"><div class="eamt">${fmt(d.balance)}</div><div class="esub">min ${fmt(d.minPayment)}/mo</div></div><button class="btn btn-del" onclick="removeDebt(${d.id})">✕</button></div>`;
+            }).join('');
+        }
+
+        /* Month-by-month payoff: minimums on everything, extra + freed-up
+           minimums attack one debt at a time in strategy order. Capped at
+           50 years — hitting the cap means payments don't cover interest. */
+        function simulatePayoff(strategy, extraBase) {
+            const live = debts.map(d => ({ id:d.id, balance:d.balance, ratePct:d.ratePct, paidMonth:null }));
+            const done = d => d.balance <= 0.005;
+            const order = () => live.filter(d=>!done(d)).sort(
+                strategy==='avalanche' ? (a,b)=>b.ratePct-a.ratePct : (a,b)=>a.balance-b.balance
+            );
+            const CAP = 600;
+            let month = 0, totalInterest = 0;
+            const points = [{ month:0, total: live.reduce((s,d)=>s+d.balance,0) }];
+            while (live.some(d=>!done(d)) && month < CAP) {
+                month++;
+                for (const d of live) if (!done(d)) {
+                    const int = d.balance * d.ratePct/100/12;
+                    d.balance += int; totalInterest += int;
+                }
+                // minimums (freed-up minimums from paid debts join the pool)
+                let pool = extraBase;
+                for (let i=0;i<live.length;i++) {
+                    if (done(live[i])) { pool += debts[i].minPayment; continue; }
+                    const pay = Math.min(live[i].balance, debts[i].minPayment);
+                    live[i].balance -= pay;
+                    pool += debts[i].minPayment - pay;
+                }
+                for (const d of order()) {
+                    if (pool <= 0) break;
+                    const pay = Math.min(d.balance, pool);
+                    d.balance -= pay; pool -= pay;
+                }
+                for (const d of live) if (done(d) && d.paidMonth===null) d.paidMonth = month;
+                points.push({ month, total: live.reduce((s,d)=>s+Math.max(d.balance,0),0) });
+            }
+            return {
+                months: month,
+                capped: month >= CAP && live.some(d=>!done(d)),
+                totalInterest,
+                paidMonth: Object.fromEntries(live.map(d=>[d.id, d.paidMonth])),
+                points,
+            };
+        }
+
+        const fmtMonths = m => m==null ? '—' : m<=0 ? 'now' : m<12 ? `${m} mo` : `${Math.floor(m/12)}y ${m%12}mo`;
+
+        function renderDebtCard() {
+            // net worth: savings + investment balances − debt balances
+            const assets = accounts.reduce((s,a)=>s+(a.startingBalance||0),0)
+                         + investments.reduce((s,i)=>s+(i.balance||0),0);
+            const totalDebt = debts.reduce((s,d)=>s+d.balance,0);
+            const netWorth = assets - totalDebt;
+            const nwEl = g('netWorthVal');
+            if (assets>0 || totalDebt>0) {
+                nwEl.textContent = (netWorth<0?'−':'') + fmtK(Math.abs(netWorth));
+                nwEl.style.color = netWorth<0 ? 'var(--danger)' : 'var(--ok)';
+            } else { nwEl.textContent='—'; nwEl.style.color='var(--text-3)'; }
+
+            setText('debt-sub', `${debtCfg.strategy} · rolling payments`);
+
+            const stats = g('debtStats'), projList = g('debtProjList'), wrap = g('debtChartWrap');
+            if (!debts.length) {
+                stats.innerHTML = `<div class="proj-empty"><strong>No debts tracked</strong>Add debts on the Debt tab — Flow builds an avalanche/snowball payoff plan and shows your true net worth.</div>`;
+                projList.innerHTML = '';
+                wrap.style.display = 'none';
+                return;
+            }
+
+            const extra = debtCfg.extra||0;
+            const altStrategy = debtCfg.strategy==='avalanche' ? 'snowball' : 'avalanche';
+            const act = simulatePayoff(debtCfg.strategy, extra);
+            const alt = simulatePayoff(altStrategy, extra);
+
+            const block = (label, value, sub) =>
+                `<div style="min-width:110px"><div class="proj-cell-label">${label}</div><div class="proj-cell-val">${value}</div>${sub?`<div class="proj-goal-note" style="margin-top:2px">${sub}</div>`:''}</div>`;
+            const intDelta = alt.totalInterest - act.totalInterest;
+            stats.innerHTML =
+                `<div style="display:flex;gap:26px;flex-wrap:wrap;padding:4px 0 12px;border-bottom:1px solid var(--border)">
+                    ${block('Total debt', fmtK(totalDebt))}
+                    ${block('To debt monthly', fmt(monthlyDebtOutlay()), extra>0?`${fmt(extra)} extra`:'minimums only')}
+                    ${block('Debt-free in', act.capped?'50y+':fmtMonths(act.months), `${altStrategy}: ${alt.capped?'50y+':fmtMonths(alt.months)}`)}
+                    ${block('Interest paid', fmtK(act.totalInterest), Math.abs(intDelta)>=1?`${altStrategy} costs ${fmtK(Math.abs(intDelta))} ${intDelta>=0?'more':'less'}`:'same either way')}
+                </div>` +
+                (act.capped ? `<div class="ot-note" style="display:block">Payments don't cover the interest — these balances never hit zero. Raise the minimums or add extra.</div>` : '');
+
+            projList.innerHTML = debts.map((d,i)=>{
+                const color = DEBT_COLORS[i%DEBT_COLORS.length];
+                return `<div class="proj-item" style="grid-template-columns:1fr auto auto auto">
+                    <div><div class="proj-name-row"><span class="edot" style="background:${color}"></span><span class="proj-name">${esc(d.name)}</span></div><div class="proj-rate">${d.ratePct}% APR · min ${fmt(d.minPayment)}/mo</div></div>
+                    <div class="proj-cell"><div class="proj-cell-label">Balance</div><div class="proj-cell-val">${fmt(d.balance)}</div></div>
+                    <div class="proj-cell"><div class="proj-cell-label">Paid off in</div><div class="proj-cell-val highlight">${act.capped&&act.paidMonth[d.id]==null?'—':fmtMonths(act.paidMonth[d.id])}</div></div>
+                    <div class="proj-cell"><div class="proj-cell-label">Interest share</div><div class="proj-cell-val">${(d.balance*d.ratePct/100/12).toFixed(0)>0?fmt(d.balance*d.ratePct/100/12)+'/mo':'—'}</div></div>
+                </div>`;
+            }).join('');
+
+            // trajectory chart: active strategy solid, alternative dashed
+            wrap.style.display = 'block';
+            const maxMonths = Math.max(act.points.length, alt.points.length);
+            const step = Math.max(1, Math.ceil(maxMonths/60));
+            const idxs = [];
+            for (let m=0; m<maxMonths; m+=step) idxs.push(m);
+            if (idxs[idxs.length-1] !== maxMonths-1) idxs.push(maxMonths-1);
+            const labels = idxs.map(m => m===0?'Now':m<12?`${m}mo`:`${(m/12).toFixed(m%12===0?0:1)}y`);
+            const series = sim => idxs.map(m => sim.points[Math.min(m, sim.points.length-1)].total);
+            const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+            const datasets = [
+                { label:`${cap(debtCfg.strategy)} (active)`, data:series(act), borderColor:'#b85a45', backgroundColor:'rgba(184,90,69,.12)', fill:true, borderWidth:2.5, pointRadius:0, tension:0.3 },
+                { label:cap(altStrategy), data:series(alt), borderColor:'rgba(196,150,45,.9)', backgroundColor:'transparent', borderWidth:1.5, borderDash:[5,3], pointRadius:0, tension:0.3 },
+            ];
+            if (debtChart) { debtChart.data.labels=labels; debtChart.data.datasets=datasets; debtChart.update(); return; }
+            debtChart = new Chart(g('debtChart'), {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive:true, maintainAspectRatio:false,
+                    plugins: {
+                        legend: { position:'bottom', labels:{ color:'#6a5c48', boxWidth:7, boxHeight:7, padding:10, font:{ size:9.5 }, usePointStyle:true, pointStyle:'circle' } },
+                        tooltip: { ...TT, callbacks:{ label: ctx => `  ${ctx.dataset.label}: ${fmtK(ctx.parsed.y)}` } },
+                    },
+                    scales: {
+                        x: { grid:{ color:'rgba(200,170,120,.05)' }, ticks:{ color:'#6a5c48', font:{ size:9.5 }, maxTicksLimit:14 }, border:{ display:false } },
+                        y: { grid:{ color:'rgba(200,170,120,.05)' }, ticks:{ color:'#6a5c48', font:{ size:9.5 }, callback:v=>fmtK(v) }, border:{ display:false }, min:0 },
+                    },
+                    animation: { duration:450 },
+                },
+            });
         }
 
         // ── Accounts / Savings ────────────────────────────────────────────────
@@ -1553,13 +1800,17 @@
             const yInv  = mInv * 12;
             const mGoals=mSav+mInv, bwGoals=bwSav+bwInv, yGoals=(mSav+mInv)*12;
 
-            const mRem  = (income.mNet||0) - mH  - mExp  - mGoals;
-            const bwRem = bwNet            - bwH - bwExp - bwGoals;
-            const yRem  = (income.yNet||0) - yH  - yExp  - yGoals;
+            const mDbt  = monthlyDebtOutlay();
+            const bwDbt = mDbt * 12 / 26;
+            const yDbt  = mDbt * 12;
 
-            const mPct  = income.mNet>0  ? Math.min((mH+mExp+mGoals)/income.mNet*100,100)  : 0;
-            const bwPct = bwNet>0        ? Math.min((bwH+bwExp+bwGoals)/bwNet*100,100)     : 0;
-            const yPct  = income.yNet>0  ? Math.min((yH+yExp+yGoals)/income.yNet*100,100)  : 0;
+            const mRem  = (income.mNet||0) - mH  - mExp  - mDbt  - mGoals;
+            const bwRem = bwNet            - bwH - bwExp - bwDbt - bwGoals;
+            const yRem  = (income.yNet||0) - yH  - yExp  - yDbt  - yGoals;
+
+            const mPct  = income.mNet>0  ? Math.min((mH+mExp+mDbt+mGoals)/income.mNet*100,100)  : 0;
+            const bwPct = bwNet>0        ? Math.min((bwH+bwExp+bwDbt+bwGoals)/bwNet*100,100)     : 0;
+            const yPct  = income.yNet>0  ? Math.min((yH+yExp+yDbt+yGoals)/income.yNet*100,100)  : 0;
             const pc    = p => p>90?'var(--danger)':p>70?'var(--warn)':'var(--accent-warm)';
             const rc    = v => v>=0?'var(--ok)':'var(--danger)';
 
@@ -1567,6 +1818,7 @@
             setColored('smT',fmt(income.mTax||0),'var(--danger)');
             setColored('smH',fmt(mH),'var(--danger)');
             setColored('smE',fmt(mExp),'var(--danger)');
+            setColored('smDbt',fmt(mDbt),'var(--danger)');
             setColored('smA',fmt(mGoals),'var(--warn)');
             setColored('smR',fmt(mRem),rc(mRem));
 
@@ -1574,6 +1826,7 @@
             setColored('sbT',fmt(income.bwTax||0),'var(--danger)');
             setColored('sbH',fmt(bwH),'var(--danger)');
             setColored('sbE',fmt(bwExp),'var(--danger)');
+            setColored('sbDbt',fmt(bwDbt),'var(--danger)');
             setColored('sbA',fmt(bwGoals),'var(--warn)');
             setColored('sbR',fmt(bwRem),rc(bwRem));
 
@@ -1581,6 +1834,7 @@
             setColored('syT',fmt(income.yTax||0),'var(--danger)');
             setColored('syH',fmt(yH),'var(--danger)');
             setColored('syE',fmt(yExp),'var(--danger)');
+            setColored('syDbt',fmt(yDbt),'var(--danger)');
             setColored('syA',fmt(yGoals),'var(--warn)');
             setColored('syR',fmt(yRem),rc(yRem));
 
@@ -1590,7 +1844,7 @@
         }
 
         // ── Charts ────────────────────────────────────────────────────────────
-        function updateCharts() { updateDonut(); updateBarChart(); updateWealthChart(); updateYearComparisonChart(); updateCompoundChart(); }
+        function updateCharts() { updateDonut(); updateBarChart(); updateWealthChart(); updateYearComparisonChart(); updateCompoundChart(); renderDebtCard(); }
 
         function updateDonut() {
             const mH    = getHousingMonthly();
@@ -1598,15 +1852,16 @@
             const yExp  = expenses.reduce((s,e)=>s+toYearly(e),0);
             const yAcct = accounts.reduce((s,a)=>s+(income.mNet||0)*a.allocationPct/100*12,0);
             const yInv  = investments.reduce((s,i)=>s+i.monthly*12,0);
+            const yDebt = monthlyDebtOutlay() * 12;
             const yTax  = income.yTax||0, yNet=income.yNet||0;
-            const unalloc = Math.max(yNet - yH - yExp - yAcct - yInv, 0);
-            const hasData = yTax>0||yExp>0||yAcct>0||yH>0||yInv>0;
+            const unalloc = Math.max(yNet - yH - yExp - yDebt - yAcct - yInv, 0);
+            const hasData = yTax>0||yExp>0||yAcct>0||yH>0||yInv>0||yDebt>0;
             g('donutEmpty').style.display = hasData ? 'none' : 'flex';
 
             const housingLabel = housing.type==='buy' ? 'Mortgage' : housing.type==='rent' ? 'Rent' : null;
-            const labels = ['Taxes', ...(housingLabel?[housingLabel]:[]), ...expenses.map(e=>e.name), ...accounts.map(a=>a.name), ...investments.map(i=>i.name), unalloc>0?'Unallocated':null].filter(Boolean);
-            const data   = [yTax, ...(housingLabel?[yH]:[]), ...expenses.map(e=>toYearly(e)), ...accounts.map(a=>(income.mNet||0)*a.allocationPct/100*12), ...investments.map(i=>i.monthly*12), unalloc>0?unalloc:null].filter(v=>v!==null);
-            const colors = ['rgba(184,90,69,.85)', ...(housingLabel?['rgba(160,80,55,.75)']:[]), ...expenses.map((_,i)=>COLORS[(i+2)%COLORS.length]), ...accounts.map((_,i)=>ACCT_COLORS[i%ACCT_COLORS.length]), ...investments.map((_,i)=>INV_COLORS[i%INV_COLORS.length]), unalloc>0?'rgba(107,156,107,.7)':null].filter(Boolean);
+            const labels = ['Taxes', ...(housingLabel?[housingLabel]:[]), ...expenses.map(e=>e.name), ...(yDebt>0?['Debt payments']:[]), ...accounts.map(a=>a.name), ...investments.map(i=>i.name), unalloc>0?'Unallocated':null].filter(Boolean);
+            const data   = [yTax, ...(housingLabel?[yH]:[]), ...expenses.map(e=>toYearly(e)), ...(yDebt>0?[yDebt]:[]), ...accounts.map(a=>(income.mNet||0)*a.allocationPct/100*12), ...investments.map(i=>i.monthly*12), unalloc>0?unalloc:null].filter(v=>v!==null);
+            const colors = ['rgba(184,90,69,.85)', ...(housingLabel?['rgba(160,80,55,.75)']:[]), ...expenses.map((_,i)=>COLORS[(i+2)%COLORS.length]), ...(yDebt>0?['rgba(160,60,45,.8)']:[]), ...accounts.map((_,i)=>ACCT_COLORS[i%ACCT_COLORS.length]), ...investments.map((_,i)=>INV_COLORS[i%INV_COLORS.length]), unalloc>0?'rgba(107,156,107,.7)':null].filter(Boolean);
 
             if (donutChart) { donutChart.data.labels=labels; donutChart.data.datasets[0].data=data; donutChart.data.datasets[0].backgroundColor=colors; donutChart.update(); return; }
             donutChart = new Chart(g('donutChart'),{
@@ -1630,6 +1885,8 @@
             const rows=[
                 ...(housingLabel&&hAmt>0?[{name:housingLabel,amt:hAmt,color:'rgba(160,80,55,.75)'}]:[]),
                 ...expenses.map((e,i)=>({name:e.name,amt:toView(e,chartView),color:COLORS[(i+2)%COLORS.length]})),
+                ...debts.map((d,i)=>({name:d.name,amt:(d.minPayment||0)*mult,color:DEBT_COLORS[i%DEBT_COLORS.length]})),
+                ...((debts.length&&debtCfg.extra>0)?[{name:'Extra to debt',amt:debtCfg.extra*mult,color:'rgba(160,60,45,.6)'}]:[]),
                 ...accounts.map((a,i)=>({name:a.name,amt:mBase*mult*a.allocationPct/100,color:ACCT_COLORS[i%ACCT_COLORS.length]})),
                 ...investments.map((inv,i)=>({name:inv.name,amt:inv.monthly*mult,color:INV_COLORS[i%INV_COLORS.length]})),
             ].sort((a,b)=>b.amt-a.amt);
@@ -1655,6 +1912,12 @@
             g('homeYears').value = housing.years   ?? 25;
             setHousingType(housing.type);
             if (housing.type === 'buy') renderMortgageCard();
+
+            // debts
+            g('debtExtra').value = debtCfg.extra || '';
+            g('ds-avalanche').classList.toggle('active', debtCfg.strategy === 'avalanche');
+            g('ds-snowball').classList.toggle('active', debtCfg.strategy !== 'avalanche');
+            renderDebts();
 
             // offer compare inputs
             ['A', 'B'].forEach((K) => {
