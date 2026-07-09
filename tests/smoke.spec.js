@@ -312,6 +312,59 @@ test.describe("Flow", () => {
         await expect(page.locator("#debt-sub")).toContainText("snowball");
     });
 
+    test("example budget lights up 50/30/20, runway, FIRE, and debt cards", async ({
+        page,
+    }) => {
+        await page.click("text=Load example budget");
+        // hero now has income
+        await expect(page.locator("#cf-net")).not.toHaveText("—");
+        // 50/30/20 card with all three rows
+        await expect(page.locator("#rule-card")).toBeVisible();
+        await expect(page.locator("#ruleRows")).toContainText("Needs");
+        await expect(page.locator("#ruleRows")).toContainText("Wants");
+        await expect(page.locator("#ruleRows")).toContainText("Savings");
+        // FIRE panel with a projection
+        await expect(page.locator("#fire-card")).toBeVisible();
+        await expect(page.locator("#fireStats")).toContainText("Independence in");
+        // emergency runway (savings tab)
+        await page.click('.section-tab[data-tab="savings"]');
+        await expect(page.locator("#runwayVal")).toContainText("mo");
+        // "Clear" in the toast wipes it all
+        await page.click(".toast-action");
+        await expect(page.locator("#cf-empty")).toBeVisible();
+    });
+
+    test("CSV import adds expenses; inflation toggle deflates projections", async ({
+        page,
+    }) => {
+        // import two expenses from CSV
+        await page.click('.section-tab[data-tab="spending"]');
+        await page.setInputFiles("#csvFile", {
+            name: "expenses.csv",
+            mimeType: "text/csv",
+            buffer: Buffer.from(
+                'name,amount,frequency,type\n"Rent, storage unit",95,monthly,need\nConcerts,60,monthly,want\n',
+            ),
+        });
+        await expect(page.locator("#eCount")).toHaveText("2 items");
+        await expect(page.locator("#eList")).toContainText("Rent, storage unit");
+        await expect(page.locator("#eList")).toContainText("want");
+
+        // inflation toggle changes investment projections
+        await page.click('.section-tab[data-tab="invest"]');
+        await page.fill("#invName", "Index fund");
+        await page.fill("#invBalance", "10000");
+        await page.fill("#invMonthly", "200");
+        await page.click("text=+ Add Investment");
+        const nominal = await page.locator("#invProjList").textContent();
+        await page.click("#infReal");
+        const real = await page.locator("#invProjList").textContent();
+        expect(real).not.toEqual(nominal);
+        // persisted across reload
+        await page.reload();
+        await expect(page.locator("#infReal")).toHaveClass(/active/);
+    });
+
     test("removing an expense offers working Undo", async ({ page }) => {
         await page.click('.section-tab[data-tab="spending"]');
         await page.fill("#expName", "Groceries");

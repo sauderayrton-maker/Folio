@@ -1,5 +1,32 @@
 # Changelog
 
+## Phase 2d — Flow finishing pass (2026-07-03)
+
+Completes the remaining Phase 2 Flow items from `handoff.md`:
+
+- **50/30/20 check**: expenses gain a need/want tag (click the badge to
+  toggle); a dashboard card compares needs/wants/savings shares of net
+  income against the 50/30/20 targets with markers on each bar. Housing and
+  debt minimums count as needs; goals, investing, and extra debt payments
+  count as savings.
+- **Emergency runway** (Savings tab): total saved ÷ monthly costs, with a
+  progress bar toward 6 months.
+- **FIRE panel**: 25× annual spending, assets today, blended expected
+  return, and "independence in ~N years" at the current contribution pace.
+- **Inflation toggle** on the wealth trajectory header: every projection
+  (charts, savings, investment tables) can switch between nominal and
+  today's dollars (2.5%/yr).
+- **Rent vs buy**: optional comparable-rent input under mortgage mode; the
+  card weighs buying (outlay − home value) against renting (outlay −
+  portfolio from investing the down payment + monthly difference at 7%),
+  clearly labeled as rough.
+- **Paycheck calendar** (Income tab): set your next payday, see the
+  3-paycheck months in the year ahead.
+- **CSV export/import** for expenses (quoted names, frequency + type).
+- **Keyboard shortcuts**: Ctrl/Cmd+S save, Alt+1–6 tabs, Alt+←/→ cycle.
+- **Load example budget** on the empty state — clearly labeled, one-click
+  Clear (decision #20).
+
 ## Phase 2c — Debt payoff planner + net worth (2026-07-03)
 
 Implements the debt payoff + net-worth items from Phase 2 of `handoff.md`.

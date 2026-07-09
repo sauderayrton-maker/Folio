@@ -413,6 +413,15 @@
                             </div>
                         </div>
 
+                        <div class="form-block">
+                            <div class="block-label">Paycheck calendar <span class="field-hint" style="text-transform:none">biweekly pay</span></div>
+                            <div class="field">
+                                <label>Next payday</label>
+                                <input type="date" id="nextPayday" onchange="onPaydayChange()" />
+                            </div>
+                            <div id="paydayResult" class="empty-msg" style="padding:8px 0 0">Set your next payday — Flow finds the 3-paycheck months in the year ahead.</div>
+                        </div>
+
                     </div><!-- /tab-income -->
 
                     <!-- ── SPENDING TAB ── -->
@@ -436,6 +445,8 @@
                                 </div>
                                 <div class="field"><label>Amortization (years)</label><input type="number" id="homeYears" value="25" min="1" max="30" step="1" oninput="onHousingChange()" /></div>
                                 <div class="mortgage-card" id="mortgageCard" style="display:none"></div>
+                                <div class="field" style="margin-top:10px"><label>Comparable rent ($/mo) <span class="field-hint">optional — rent vs buy</span></label><input type="number" id="cmpRent" placeholder="1800" min="0" step="50" oninput="onHousingChange()" /></div>
+                                <div class="mortgage-card" id="rvbCard" style="display:none"></div>
                             </div>
                         </div>
 
@@ -443,15 +454,29 @@
                             <div class="block-label">Add an expense</div>
                             <div class="field" id="f-expName"><label>Name</label><input type="text" id="expName" placeholder="Groceries, subscriptions, utilities…" onkeydown="if(event.key==='Enter') addExpense()" /></div>
                             <div class="field" id="f-expAmt"><label>Amount ($)</label><input type="number" id="expAmt" placeholder="0.00" min="0" step="0.01" onkeydown="if(event.key==='Enter') addExpense()" /></div>
-                            <div class="field">
-                                <label>Frequency</label>
-                                <select id="expFreq">
-                                    <option value="monthly">Monthly</option>
-                                    <option value="biweekly">Biweekly (every 2 weeks)</option>
-                                    <option value="yearly">Yearly</option>
-                                </select>
+                            <div class="field-row">
+                                <div class="field">
+                                    <label>Frequency</label>
+                                    <select id="expFreq">
+                                        <option value="monthly">Monthly</option>
+                                        <option value="biweekly">Biweekly (every 2 weeks)</option>
+                                        <option value="yearly">Yearly</option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label>Type <span class="field-hint">50/30/20</span></label>
+                                    <select id="expKind">
+                                        <option value="need">Need</option>
+                                        <option value="want">Want</option>
+                                    </select>
+                                </div>
                             </div>
                             <button class="btn btn-primary btn-full" onclick="addExpense()">+ Add Expense</button>
+                            <div style="display:flex;gap:8px;margin-top:8px">
+                                <button class="btn" style="flex:1" onclick="exportExpensesCSV()">Export CSV</button>
+                                <button class="btn" style="flex:1" onclick="g('csvFile').click()">Import CSV</button>
+                                <input type="file" id="csvFile" accept=".csv,text/csv" style="display:none" onchange="importExpensesCSV(this)" />
+                            </div>
                         </div>
 
                         <div class="form-block">
@@ -521,6 +546,18 @@
                                 <span class="list-count" id="acctCount">0 accounts</span>
                             </div>
                             <div class="list-scroll" id="acctList"><div class="empty-msg"><strong>No goals set</strong>Add savings accounts or targets — emergency fund, down payment, travel.</div></div>
+                        </div>
+                        <div class="form-block">
+                            <div class="block-label">Emergency runway</div>
+                            <div class="stat-row">
+                                <div class="stat-row-label">Months covered</div>
+                                <div style="text-align:right">
+                                    <div class="stat-row-value" id="runwayVal">—</div>
+                                    <div class="stat-row-sub" id="runwaySub"></div>
+                                </div>
+                            </div>
+                            <div class="prog-wrap" style="margin-top:8px"><div class="prog-bar" id="runwayBar" style="width:0%"></div></div>
+                            <div class="prog-label"><span>saved ÷ monthly costs</span><span>target: 6 months</span></div>
                         </div>
                     </div><!-- /tab-savings -->
 
@@ -644,6 +681,7 @@
                         <div id="cf-empty" class="cf-empty">
                             <strong>Start by adding an income source on the left</strong>
                             Add your hourly wage, annual salary, or freelance income — Flow builds your picture in real time.
+                            <div style="margin-top:12px"><button class="btn btn-primary" style="font-size:12px" onclick="loadExampleBudget()">Load example budget</button></div>
                         </div>
                     </div>
 
@@ -676,7 +714,13 @@
                         <div class="chart-card">
                             <div class="chart-card-hdr">
                                 <div class="chart-card-title">Wealth trajectory</div>
-                                <span style="font-family:var(--mono);font-size:9.5px;color:var(--text-4);letter-spacing:.4px">30-year projection · savings &amp; investments</span>
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <span style="font-family:var(--mono);font-size:9.5px;color:var(--text-4);letter-spacing:.4px">30-year projection</span>
+                                    <div class="tgroup">
+                                        <button class="tbtn active" id="infNom"  onclick="setRealDollars(false)">Nominal</button>
+                                        <button class="tbtn"        id="infReal" onclick="setRealDollars(true)" title="Adjusted for 2.5%/yr inflation">Today's $</button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="chart-wrap chart-wrap-tall">
                                 <div class="chart-empty" id="wealthEmpty">Add savings goals or investments<br>to project your wealth over time</div>
@@ -751,6 +795,23 @@
                                 <div class="prog-label"><span>committed of net</span><span id="pyP">0%</span></div>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="summary-card" id="rule-card" style="display:none">
+                        <div class="summary-card-hdr">
+                            <div class="rp-section-hdr" style="margin-bottom:0"><h2>50 / 30 / 20 check</h2><p>needs · wants · savings, as a share of net income</p></div>
+                        </div>
+                        <div id="ruleRows"></div>
+                    </div>
+
+                    <div class="proj-card" id="fire-card" style="display:none">
+                        <div class="proj-card-hdr" style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">
+                            <div class="rp-section-hdr" style="margin-bottom:0"><h2>Financial independence</h2><p>25× annual spending · at your current pace</p></div>
+                            <div style="text-align:right"><div class="proj-cell-label">FIRE number</div><div class="proj-cell-val" id="fireNumber" style="font-size:15px">—</div></div>
+                        </div>
+                        <div id="fireStats"></div>
+                        <div class="prog-wrap" style="margin-top:12px"><div class="prog-bar" id="fireBar" style="width:0%"></div></div>
+                        <div class="prog-label"><span id="fireBarNote">progress to independence</span><span id="firePct">0%</span></div>
                     </div>
 
                     <div class="proj-card" id="debt-card">
@@ -875,6 +936,8 @@
         let offerCompare = { a: blankOffer(), b: blankOffer() };
         let debts       = [];
         let debtCfg     = { strategy: 'avalanche', extra: 0 };
+        let payCfg      = { nextPayday: '' };
+        let viewCfg     = { realDollars: false };
         let listView    = 'monthly';
         let chartView   = 'monthly';
         let donutChart    = null;
@@ -928,7 +991,7 @@
         }
 
         function collectBlob() {
-            return { version: 1, incomes, taxCfg, housing, expenses, accounts, investments, offerCompare, debts, debtCfg };
+            return { version: 1, incomes, taxCfg, housing, expenses, accounts, investments, offerCompare, debts, debtCfg, payCfg, viewCfg };
         }
 
         function blankFlowData() {
@@ -941,6 +1004,8 @@
                 offerCompare: { a: blankOffer(), b: blankOffer() },
                 debts: [],
                 debtCfg: { strategy: 'avalanche', extra: 0 },
+                payCfg: { nextPayday: '' },
+                viewCfg: { realDollars: false },
             };
         }
 
@@ -961,6 +1026,8 @@
             };
             debts   = Array.isArray(d.debts) ? d.debts : [];
             debtCfg = { strategy: 'avalanche', extra: 0, ...(d.debtCfg || {}) };
+            payCfg  = { nextPayday: '', ...(d.payCfg || {}) };
+            viewCfg = { realDollars: false, ...(d.viewCfg || {}) };
         }
 
         function restore() {
@@ -1263,7 +1330,9 @@
                 housing.downPct = parseFloat(g('homeDown').value)   || 0;
                 housing.rate    = parseFloat(g('homeRate').value)    || 0;
                 housing.years   = parseFloat(g('homeYears').value)  || 25;
+                housing.cmpRent = parseFloat(g('cmpRent').value)    || 0;
                 renderMortgageCard();
+                renderRvB();
             }
             persist(); renderHero(); renderSummary(); updateCharts();
         }
@@ -1340,11 +1409,11 @@
 
         // ── Expenses ──────────────────────────────────────────────────────────
         function addExpense() {
-            const name=g('expName').value.trim(), amount=parseFloat(g('expAmt').value), freq=g('expFreq').value;
+            const name=g('expName').value.trim(), amount=parseFloat(g('expAmt').value), freq=g('expFreq').value, kind=g('expKind').value;
             if(!name) flashInvalid('f-expName');
             if(isNaN(amount)||amount<=0) flashInvalid('f-expAmt');
             if(!name||isNaN(amount)||amount<=0) return;
-            expenses.push({id:Date.now(),name,amount,freq});
+            expenses.push({id:Date.now(),name,amount,freq,kind});
             g('expName').value=''; g('expAmt').value='';
             persist(); renderExpenses(); renderHero(); renderSummary(); updateCharts();
         }
@@ -1373,7 +1442,8 @@
             list.innerHTML=expenses.map((e,i)=>{
                 const color=COLORS[i%COLORS.length],disp=toView(e,listView),alt=altFn(e);
                 const FREQ={monthly:'mo',biweekly:'2wk',yearly:'yr'};
-                return `<div class="eitem"><span class="edot" style="background:${color}"></span><span class="ename">${esc(e.name)}</span><span class="ebadge">${FREQ[e.freq]}</span><div class="eamt-wrap"><div class="eamt">${fmt(disp)}<span class="eamt-unit">/${unit}</span></div><div class="esub">${fmt(alt)}/${altUnit}</div></div><button class="btn btn-del" onclick="removeExpense(${e.id})">✕</button></div>`;
+                const kindBadge = `<span class="ebadge" style="cursor:pointer;${e.kind==='want'?'color:var(--warn);border-color:rgba(196,150,45,.35)':''}" onclick="toggleExpenseKind(${e.id})" title="click to toggle need / want (50/30/20)">${e.kind==='want'?'want':'need'}</span>`;
+                return `<div class="eitem"><span class="edot" style="background:${color}"></span><span class="ename">${esc(e.name)}</span>${kindBadge}<span class="ebadge">${FREQ[e.freq]}</span><div class="eamt-wrap"><div class="eamt">${fmt(disp)}<span class="eamt-unit">/${unit}</span></div><div class="esub">${fmt(alt)}/${altUnit}</div></div><button class="btn btn-del" onclick="removeExpense(${e.id})">✕</button></div>`;
             }).join('');
         }
 
@@ -1563,6 +1633,261 @@
             });
         }
 
+        // ── Inflation view (nominal vs today's dollars) ───────────────────────
+        const INFLATION = 0.025;
+        const deflate = (v, yr) => viewCfg.realDollars ? v / Math.pow(1 + INFLATION, yr) : v;
+        function setRealDollars(v) {
+            viewCfg.realDollars = v;
+            g('infNom').classList.toggle('active', !v);
+            g('infReal').classList.toggle('active', v);
+            persist(); renderProjections(); renderInvestmentProjections(); updateCharts();
+        }
+
+        // ── Emergency runway ──────────────────────────────────────────────────
+        function renderRunway() {
+            const saved  = accounts.reduce((s,a)=>s+(a.startingBalance||0),0);
+            const mCosts = getHousingMonthly()
+                         + expenses.reduce((s,e)=>s+toMonthly(e),0)
+                         + debts.reduce((s,d)=>s+(d.minPayment||0),0);
+            if (mCosts <= 0) {
+                setText('runwayVal','—'); setText('runwaySub','add monthly costs first');
+                g('runwayBar').style.width='0%';
+                return;
+            }
+            const months = saved / mCosts;
+            setText('runwayVal', months.toFixed(1) + ' mo');
+            setText('runwaySub', `${fmtK(saved)} saved ÷ ${fmt(mCosts)}/mo`);
+            const bar = g('runwayBar');
+            bar.style.width = Math.min(months/6*100, 100) + '%';
+            bar.style.background = months>=6 ? 'var(--ok)' : months>=3 ? 'linear-gradient(90deg,var(--accent),var(--accent-warm))' : 'var(--danger)';
+        }
+
+        // ── 50 / 30 / 20 ──────────────────────────────────────────────────────
+        function renderBudgetRule() {
+            const card = g('rule-card');
+            const mNet = income.mNet || 0;
+            if (mNet <= 0) { card.style.display='none'; return; }
+            card.style.display = 'block';
+            const mDebtMin = debts.reduce((s,d)=>s+(d.minPayment||0),0);
+            const needs = getHousingMonthly() + mDebtMin
+                        + expenses.filter(e=>e.kind!=='want').reduce((s,e)=>s+toMonthly(e),0);
+            const wants = expenses.filter(e=>e.kind==='want').reduce((s,e)=>s+toMonthly(e),0);
+            const save  = accounts.reduce((s,a)=>s+mNet*a.allocationPct/100,0)
+                        + investments.reduce((s,i)=>s+i.monthly,0)
+                        + (debtCfg.extra||0);
+            const rows = [
+                { name:'Needs',   amt:needs, target:50, over:'danger',  hint:'housing · groceries · debt minimums' },
+                { name:'Wants',   amt:wants, target:30, over:'warn',    hint:'expenses tagged "want"' },
+                { name:'Savings', amt:save,  target:20, over:'ok-flip', hint:'goals · investing · extra debt payments' },
+            ];
+            g('ruleRows').innerHTML = rows.map(r=>{
+                const pct = r.amt/mNet*100;
+                const good = r.name==='Savings' ? pct>=r.target : pct<=r.target;
+                const color = good ? 'var(--ok)' : (r.name==='Needs'?'var(--danger)':'var(--warn)');
+                return `<div style="padding:7px 0;border-bottom:1px solid var(--border)">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
+                        <span style="font-size:12.5px;font-weight:500;color:var(--text)">${r.name} <span class="field-hint" style="font-family:var(--mono);font-size:9px">${r.hint}</span></span>
+                        <span style="font-family:var(--mono);font-size:11px;color:${color}">${pct.toFixed(0)}% <span style="color:var(--text-4)">/ ${r.target}% target</span></span>
+                    </div>
+                    <div class="prog-wrap" style="position:relative">
+                        <div class="prog-bar" style="width:${Math.min(pct,100)}%;background:${color}"></div>
+                        <div style="position:absolute;top:-2px;bottom:-2px;left:${r.target}%;width:1px;background:var(--text-3)"></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── FIRE panel ────────────────────────────────────────────────────────
+        function renderFire() {
+            const card = g('fire-card');
+            const mSpend = getHousingMonthly()
+                         + expenses.reduce((s,e)=>s+toMonthly(e),0)
+                         + debts.reduce((s,d)=>s+(d.minPayment||0),0);
+            const assets = accounts.reduce((s,a)=>s+(a.startingBalance||0),0)
+                         + investments.reduce((s,i)=>s+(i.balance||0),0);
+            if (mSpend <= 0) { card.style.display='none'; return; }
+            card.style.display = 'block';
+            const fireNumber = mSpend * 12 * 25;
+            const mNet = income.mNet || 0;
+            const mContrib = accounts.reduce((s,a)=>s+mNet*a.allocationPct/100,0)
+                           + investments.reduce((s,i)=>s+i.monthly,0);
+            // blended return: investment-weighted, 7% default when nothing invested
+            const invTotal = investments.reduce((s,i)=>s+(i.balance||0)+i.monthly*100,0);
+            const blended = invTotal>0
+                ? investments.reduce((s,i)=>s+((i.balance||0)+i.monthly*100)*(i.returnPct||7),0)/invTotal
+                : 7;
+            let years = null, bal = assets;
+            if (bal >= fireNumber) years = 0;
+            else if (mContrib > 0 || bal > 0) {
+                for (let y=1; y<=100; y++) {
+                    bal = bal*(1+blended/100) + mContrib*12;
+                    if (bal >= fireNumber) { years = y; break; }
+                }
+            }
+            const pct = Math.min(assets/fireNumber*100, 100);
+            setText('fireNumber', fmtK(fireNumber));
+            const block = (label, value, sub) =>
+                `<div style="min-width:110px"><div class="proj-cell-label">${label}</div><div class="proj-cell-val">${value}</div>${sub?`<div class="proj-goal-note" style="margin-top:2px">${sub}</div>`:''}</div>`;
+            g('fireStats').innerHTML =
+                `<div style="display:flex;gap:26px;flex-wrap:wrap;padding:4px 0 2px">
+                    ${block('Annual spending', fmtK(mSpend*12), 'housing · expenses · debt minimums')}
+                    ${block('Assets today', fmtK(assets), 'savings + investments')}
+                    ${block('Contributing', fmt(mContrib)+'/mo', `${blended.toFixed(1)}% blended return`)}
+                    ${block('Independence in', years===null?'—':years===0?'reached 🎉':`~${years} yr`, years===null?'add monthly savings to project':'at current pace')}
+                </div>`;
+            g('fireBar').style.width = pct + '%';
+            setText('firePct', pct.toFixed(1) + '%');
+        }
+
+        // ── Paycheck calendar ─────────────────────────────────────────────────
+        function onPaydayChange() {
+            payCfg.nextPayday = g('nextPayday').value || '';
+            persist(); renderPaydays();
+        }
+        function renderPaydays() {
+            const el = g('paydayResult');
+            if (!payCfg.nextPayday) {
+                el.innerHTML = 'Set your next payday — Flow finds the 3-paycheck months in the year ahead.';
+                return;
+            }
+            const start = new Date(payCfg.nextPayday + 'T12:00:00');
+            if (isNaN(start)) { el.innerHTML = 'That date didn\'t parse — try again.'; return; }
+            const counts = {};
+            for (let i=0; i<27; i++) {
+                const d = new Date(start.getTime() + i*14*86400000);
+                const key = d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+                counts[key] = (counts[key]||0)+1;
+            }
+            const triples = Object.entries(counts).filter(([,c])=>c>=3).map(([k])=>k).slice(0,3);
+            el.innerHTML = triples.length
+                ? `<strong>3-paycheck months ahead</strong>${triples.join(' · ')}<br><span style="color:var(--text-4)">budget on 2 paychecks — bank the third.</span>`
+                : 'No 3-paycheck months in the next year from that date.';
+        }
+
+        // ── Expenses CSV ──────────────────────────────────────────────────────
+        function exportExpensesCSV() {
+            if (!expenses.length) { Folio.toast('no expenses to export'); return; }
+            const q = s => `"${String(s).replace(/"/g,'""')}"`;
+            const csv = 'name,amount,frequency,type\n'
+                + expenses.map(e=>[q(e.name),e.amount,e.freq,e.kind||'need'].join(',')).join('\n');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+            a.download = 'flow-expenses.csv';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            Folio.toast('expenses exported ✓');
+        }
+        function importExpensesCSV(input) {
+            const file = input.files && input.files[0];
+            input.value = '';
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const lines = String(reader.result).split(/\r?\n/).filter(l=>l.trim());
+                let added = 0;
+                for (const line of lines) {
+                    // fields: name (may be quoted), amount, frequency, type
+                    const m = line.match(/^\s*(?:"((?:[^"]|"")*)"|([^,]*?))\s*,\s*([\d.]+)\s*(?:,\s*(monthly|biweekly|yearly))?\s*(?:,\s*(need|want))?\s*$/i);
+                    if (!m) continue;
+                    const name = (m[1]!==undefined ? m[1].replace(/""/g,'"') : m[2]).trim();
+                    const amount = parseFloat(m[3]);
+                    if (!name || isNaN(amount) || amount<=0 || /^name$/i.test(name)) continue;
+                    expenses.push({ id:Date.now()+added, name, amount, freq:(m[4]||'monthly').toLowerCase(), kind:(m[5]||'need').toLowerCase() });
+                    added++;
+                }
+                if (added) {
+                    persist(); renderExpenses(); renderHero(); renderSummary(); updateCharts();
+                    Folio.toast(`imported ${added} expense${added!==1?'s':''} ✓`);
+                } else {
+                    Folio.toast('nothing importable in that file — expected: name, amount, frequency, type');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function toggleExpenseKind(id) {
+            const e = expenses.find(e=>e.id===id);
+            if (!e) return;
+            e.kind = e.kind==='want' ? 'need' : 'want';
+            persist(); renderExpenses(); updateCharts();
+        }
+
+        // ── Rent vs buy ───────────────────────────────────────────────────────
+        function renderRvB() {
+            const card = g('rvbCard');
+            const rent = housing.cmpRent || 0;
+            if (housing.type!=='buy' || !rent || !housing.price || !housing.rate) { card.style.display='none'; return; }
+            const monthly = getMortgageMonthly();
+            const years   = housing.years;
+            const down    = housing.price * housing.downPct / 100;
+            // Buy: all-in outlay minus the house you end up owning (at today's price)
+            const buyOutlay = down + monthly*12*years;
+            const buyNet    = buyOutlay - housing.price;
+            // Rent: rent outlay minus the portfolio from investing the down payment
+            // plus any monthly difference at 7%
+            const diff      = Math.max(monthly - rent, 0);
+            const portfolio = fvCalc(down, diff, 7, years);
+            const rentNet   = rent*12*years - portfolio;
+            const delta     = rentNet - buyNet;
+            card.style.display = 'block';
+            card.innerHTML = `
+                <div class="mortgage-row hero"><span>Rent vs buy · ${years}yr</span><span>${delta>=0?'Buying':'Renting'} wins by ${fmtK(Math.abs(delta))}</span></div>
+                <div class="mortgage-row"><span>Buy: outlay − home value</span><span>${fmtK(buyOutlay)} − ${fmtK(housing.price)} = ${fmtK(buyNet)}</span></div>
+                <div class="mortgage-row"><span>Rent: outlay − portfolio</span><span>${fmtK(rent*12*years)} − ${fmtK(portfolio)} = ${fmtK(rentNet)}</span></div>
+                <div class="mortgage-row"><span style="color:var(--text-4)">rough: flat prices &amp; rent, 7% return, no maintenance</span><span></span></div>`;
+        }
+
+        // ── Example budget (decision #20) ─────────────────────────────────────
+        function loadExampleBudget() {
+            if (incomes.length) return;
+            const ex = blankFlowData();
+            ex.incomes = [{ id:1, name:'Example job', type:'salary', wage:0, hours:0, annualGross:65000 }];
+            ex.housing = { ...ex.housing, type:'rent', rent:1600 };
+            ex.expenses = [
+                { id:2, name:'Groceries', amount:450, freq:'monthly', kind:'need' },
+                { id:3, name:'Phone + internet', amount:120, freq:'monthly', kind:'need' },
+                { id:4, name:'Transit pass', amount:128, freq:'monthly', kind:'need' },
+                { id:5, name:'Streaming', amount:35, freq:'monthly', kind:'want' },
+                { id:6, name:'Eating out', amount:180, freq:'monthly', kind:'want' },
+            ];
+            ex.accounts = [{ id:7, name:'Emergency fund', startingBalance:2500, allocationPct:10, target:15000 }];
+            ex.investments = [{ id:8, name:'Index fund (TFSA)', balance:4000, monthly:300, returnPct:7 }];
+            ex.debts = [{ id:9, name:'Credit card', balance:2400, ratePct:19.99, minPayment:120 }];
+            applyBlob(ex);
+            persist();
+            applyStateToUI();
+            Folio.toast('example budget loaded — poke around, then make it yours', {
+                label: 'Clear',
+                fn: () => { applyBlob(blankFlowData()); persist(); applyStateToUI(); },
+            });
+        }
+
+        // ── Keyboard shortcuts (parity with Resume Studio) ────────────────────
+        const TAB_ORDER = ['income','spending','debt','savings','invest','compare'];
+        document.addEventListener('keydown', (e) => {
+            const t = e.target;
+            const typing = t && (t.tagName==='INPUT' || t.tagName==='SELECT' || t.tagName==='TEXTAREA');
+            const mod = e.ctrlKey || e.metaKey;
+            if (mod && e.key === 's') {
+                e.preventDefault();
+                persist();
+                Folio.toast('saved ✓');
+                return;
+            }
+            if (typing) return;
+            if (e.altKey && e.key >= '1' && e.key <= String(TAB_ORDER.length)) {
+                e.preventDefault();
+                switchTab(TAB_ORDER[+e.key - 1]);
+                return;
+            }
+            if (e.altKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                e.preventDefault();
+                const cur = TAB_ORDER.indexOf(document.querySelector('.section-tab.active')?.dataset.tab || 'income');
+                const next = (cur + (e.key==='ArrowRight'?1:TAB_ORDER.length-1)) % TAB_ORDER.length;
+                switchTab(TAB_ORDER[next]);
+            }
+        });
+
         // ── Accounts / Savings ────────────────────────────────────────────────
         function addAccount() {
             const name=g('acctName').value.trim(),start=parseFloat(g('acctStart').value)||0;
@@ -1601,7 +1926,7 @@
             const mNet=income.mNet||0;
             list.innerHTML=accounts.map((a,i)=>{
                 const color=ACCT_COLORS[i%ACCT_COLORS.length],mAlloc=mNet*a.allocationPct/100;
-                const b1yr=a.startingBalance+mAlloc*12,b5yr=a.startingBalance+mAlloc*60;
+                const b1yr=deflate(a.startingBalance+mAlloc*12,1),b5yr=deflate(a.startingBalance+mAlloc*60,5);
                 let tBlock='';
                 if(a.target&&a.target>0&&mAlloc>0){
                     const rem=a.target-a.startingBalance,months=rem<=0?0:Math.ceil(rem/mAlloc);
@@ -1656,10 +1981,10 @@
             if(!investments.length){list.innerHTML=`<div class="proj-empty"><strong>No investments added</strong>Add accounts on the Invest tab to see compound growth projections.</div>`;return;}
             list.innerHTML=investments.map((inv,i)=>{
                 const color=INV_COLORS[i%INV_COLORS.length];
-                const v1=fvCalc(inv.balance,inv.monthly,inv.returnPct,1);
-                const v5=fvCalc(inv.balance,inv.monthly,inv.returnPct,5);
-                const v10=fvCalc(inv.balance,inv.monthly,inv.returnPct,10);
-                const v30=fvCalc(inv.balance,inv.monthly,inv.returnPct,30);
+                const v1=deflate(fvCalc(inv.balance,inv.monthly,inv.returnPct,1),1);
+                const v5=deflate(fvCalc(inv.balance,inv.monthly,inv.returnPct,5),5);
+                const v10=deflate(fvCalc(inv.balance,inv.monthly,inv.returnPct,10),10);
+                const v30=deflate(fvCalc(inv.balance,inv.monthly,inv.returnPct,30),30);
                 return `<div class="inv-proj-item"><div><div class="inv-proj-name"><span class="edot" style="background:${color};display:inline-block;margin-right:7px"></span>${esc(inv.name)}</div><div class="inv-proj-meta">${fmt(inv.monthly)}/mo · ${inv.returnPct}% annual return · ${fmt(inv.balance)} today</div></div><div class="inv-proj-cell"><div class="inv-proj-cell-label">1 Year</div><div class="inv-proj-cell-val">${fmtK(v1)}</div></div><div class="inv-proj-cell"><div class="inv-proj-cell-label">5 Years</div><div class="inv-proj-cell-val">${fmtK(v5)}</div></div><div class="inv-proj-cell"><div class="inv-proj-cell-label">10 Years</div><div class="inv-proj-cell-val">${fmtK(v10)}</div></div><div class="inv-proj-cell"><div class="inv-proj-cell-label">30 Years</div><div class="inv-proj-cell-val big">${fmtK(v30)}</div></div></div>`;
             }).join('');
         }
@@ -1677,13 +2002,13 @@
 
             accounts.forEach((a, i) => {
                 const mo  = mNet * a.allocationPct / 100;
-                const vals = sampleYrs.map(yr => a.startingBalance + mo * 12 * yr);
+                const vals = sampleYrs.map(yr => deflate(a.startingBalance + mo * 12 * yr, yr));
                 totals = totals.map((t, j) => t + vals[j]);
                 datasets.push({ label: a.name, data: vals, borderColor: ACCT_COLORS[i % ACCT_COLORS.length].replace('.85)', '1)'), backgroundColor: 'transparent', borderWidth: 1.8, pointRadius: 2.5, tension: 0.3 });
             });
 
             investments.forEach((inv, i) => {
-                const vals = sampleYrs.map(yr => fvCalc(inv.balance, inv.monthly, inv.returnPct, yr));
+                const vals = sampleYrs.map(yr => deflate(fvCalc(inv.balance, inv.monthly, inv.returnPct, yr), yr));
                 totals = totals.map((t, j) => t + vals[j]);
                 datasets.push({ label: inv.name, data: vals, borderColor: INV_COLORS[i % INV_COLORS.length].replace('.9)', '1)'), backgroundColor: 'transparent', borderWidth: 1.8, pointRadius: 2.5, tension: 0.4, borderDash: [5,3] });
             });
@@ -1716,8 +2041,8 @@
             const groups = [1, 5, 10, 30];
             const mNet   = income.mNet || 0;
             const allItems = [
-                ...accounts.map((a, i) => ({ label: a.name, color: ACCT_COLORS[i % ACCT_COLORS.length], vals: groups.map(yr => a.startingBalance + mNet * a.allocationPct / 100 * 12 * yr) })),
-                ...investments.map((inv, i) => ({ label: inv.name, color: INV_COLORS[i % INV_COLORS.length], vals: groups.map(yr => fvCalc(inv.balance, inv.monthly, inv.returnPct, yr)) })),
+                ...accounts.map((a, i) => ({ label: a.name, color: ACCT_COLORS[i % ACCT_COLORS.length], vals: groups.map(yr => deflate(a.startingBalance + mNet * a.allocationPct / 100 * 12 * yr, yr)) })),
+                ...investments.map((inv, i) => ({ label: inv.name, color: INV_COLORS[i % INV_COLORS.length], vals: groups.map(yr => deflate(fvCalc(inv.balance, inv.monthly, inv.returnPct, yr), yr)) })),
             ];
             const hasData = allItems.length > 0;
             g('yearCmpEmpty').style.display = hasData ? 'none' : 'flex';
@@ -1750,8 +2075,8 @@
             const hasData   = investments.length > 0 && investments.some(i => i.balance > 0 || i.monthly > 0);
             g('compoundEmpty').style.display = hasData ? 'none' : 'flex';
 
-            const principals = sampleYrs.map(yr => investments.reduce((s, i) => s + i.balance + i.monthly * 12 * yr, 0));
-            const values     = sampleYrs.map(yr => investments.reduce((s, i) => s + fvCalc(i.balance, i.monthly, i.returnPct, yr), 0));
+            const principals = sampleYrs.map(yr => deflate(investments.reduce((s, i) => s + i.balance + i.monthly * 12 * yr, 0), yr));
+            const values     = sampleYrs.map(yr => deflate(investments.reduce((s, i) => s + fvCalc(i.balance, i.monthly, i.returnPct, yr), 0), yr));
 
             if (compoundChart) {
                 compoundChart.data.labels = labels;
@@ -1844,7 +2169,7 @@
         }
 
         // ── Charts ────────────────────────────────────────────────────────────
-        function updateCharts() { updateDonut(); updateBarChart(); updateWealthChart(); updateYearComparisonChart(); updateCompoundChart(); renderDebtCard(); }
+        function updateCharts() { updateDonut(); updateBarChart(); updateWealthChart(); updateYearComparisonChart(); updateCompoundChart(); renderDebtCard(); renderRunway(); renderBudgetRule(); renderFire(); }
 
         function updateDonut() {
             const mH    = getHousingMonthly();
@@ -1910,8 +2235,15 @@
             g('homeDown').value  = housing.downPct ?? 10;
             g('homeRate').value  = housing.rate    ?? 6.5;
             g('homeYears').value = housing.years   ?? 25;
+            g('cmpRent').value   = housing.cmpRent || '';
             setHousingType(housing.type);
             if (housing.type === 'buy') renderMortgageCard();
+
+            // paycheck calendar + inflation view
+            g('nextPayday').value = payCfg.nextPayday || '';
+            renderPaydays();
+            g('infNom').classList.toggle('active', !viewCfg.realDollars);
+            g('infReal').classList.toggle('active', !!viewCfg.realDollars);
 
             // debts
             g('debtExtra').value = debtCfg.extra || '';
