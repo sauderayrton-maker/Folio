@@ -1,5 +1,22 @@
 # Changelog
 
+## Phase 2b — Offer Compare (2026-07-03)
+
+Implements decision #16 of `handoff.md`.
+
+- **New "Compare" tab in Flow**: enter two compensation packages — each with
+  its own country/province/state (or a manual flat rate), salary, and
+  optional local rent — and get the real monthly/yearly take-home difference
+  through the same tax engine as the dashboard (CPP/EI, FICA, provincial and
+  state rates included).
+- The verdict line accounts for rent when either offer has one, so
+  relocation offers compare honestly ("$8k more gross" can lose to lower
+  rent + no state tax, and Flow shows it).
+- Offers persist inside the active scenario, so "current vs. Austin offer"
+  can live alongside "current vs. promotion" in separate scenarios.
+- Shared `fillRegionSelect()` helper now drives both the dashboard tax
+  region picker and the per-offer pickers.
+
 ## Phase 2a — Named slots: résumé profiles & budget scenarios (2026-07-03)
 
 Implements decision #15 of `handoff.md` and the two flagship features on it.

@@ -117,6 +117,11 @@
             .tax-row.total span:last-child { color:var(--danger); font-weight:600; }
             .tax-note { margin-top:8px; font-family:var(--mono); font-size:9.5px; color:var(--text-4); line-height:1.5; letter-spacing:.2px; }
 
+            /* ── OFFER COMPARE ── */
+            .oc-verdict { margin-top:12px; padding:10px 12px; border-radius:var(--radius-sm); font-size:12.5px; line-height:1.55; background:var(--ok-dim); border:1px solid rgba(107,156,107,.3); color:var(--ok); }
+            .oc-verdict b { font-weight:700; }
+            .oc-verdict.oc-even { background:var(--surface-2); border-color:var(--border-2); color:var(--text-2); }
+
             /* ── HOUSING ── */
             .housing-toggle { display:flex; gap:1px; margin-bottom:12px; background:var(--bg-3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:2px; }
             .housing-btn { flex:1; padding:5px 8px; font-size:11px; font-family:var(--font); font-weight:500; color:var(--text-3); background:transparent; border:none; border-radius:4px; cursor:pointer; transition:all .12s; text-align:center; }
@@ -305,6 +310,9 @@
                     </button>
                     <button class="section-tab" onclick="switchTab('invest')" data-tab="invest">
                         <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>Invest
+                    </button>
+                    <button class="section-tab" onclick="switchTab('compare')" data-tab="compare">
+                        <svg viewBox="0 0 24 24"><path d="M12 3v18M9 21h6"/><path d="M6 7 3 13a3 3 0 0 0 6 0L6 7Z"/><path d="m18 7-3 6a3 3 0 0 0 6 0l-3-6Z"/><path d="M6 7h12"/></svg>Compare
                     </button>
                 </div>
 
@@ -499,6 +507,50 @@
                             <div class="list-scroll" id="invList"><div class="empty-msg"><strong>No investments added</strong>Add brokerage accounts, retirement funds, or any investment you contribute to monthly.</div></div>
                         </div>
                     </div><!-- /tab-invest -->
+
+                    <!-- ── COMPARE TAB (Offer Compare) ── -->
+                    <div class="tab-section" id="tab-compare">
+
+                        <div class="form-block">
+                            <div class="block-label">Offer A</div>
+                            <div class="field"><label>Label <span class="field-hint">optional</span></label><input type="text" id="ocLabelA" placeholder="Current job" oninput="onOfferChange()" /></div>
+                            <div class="field"><label>Annual salary ($)</label><input type="number" id="ocSalaryA" placeholder="65000" min="0" step="1000" oninput="onOfferChange()" /></div>
+                            <div class="field">
+                                <label>Country</label>
+                                <select id="ocCountryA" onchange="onOfferCountryChange('A')">
+                                    <option value="CA">Canada</option>
+                                    <option value="US">United States</option>
+                                    <option value="manual">Other (manual rate)</option>
+                                </select>
+                            </div>
+                            <div class="field" id="f-ocRegionA"><label>Province / State</label><select id="ocRegionA" onchange="onOfferChange()"></select></div>
+                            <div class="field" id="f-ocManualA" style="display:none"><label>Flat tax rate <span class="field-hint">%</span></label><input type="number" id="ocManualA" value="22" min="0" max="100" step="0.1" oninput="onOfferChange()" /></div>
+                            <div class="field"><label>Monthly rent there <span class="field-hint">optional</span></label><input type="number" id="ocRentA" placeholder="0" min="0" step="50" oninput="onOfferChange()" /></div>
+                        </div>
+
+                        <div class="form-block">
+                            <div class="block-label">Offer B</div>
+                            <div class="field"><label>Label <span class="field-hint">optional</span></label><input type="text" id="ocLabelB" placeholder="New offer" oninput="onOfferChange()" /></div>
+                            <div class="field"><label>Annual salary ($)</label><input type="number" id="ocSalaryB" placeholder="72000" min="0" step="1000" oninput="onOfferChange()" /></div>
+                            <div class="field">
+                                <label>Country</label>
+                                <select id="ocCountryB" onchange="onOfferCountryChange('B')">
+                                    <option value="CA">Canada</option>
+                                    <option value="US">United States</option>
+                                    <option value="manual">Other (manual rate)</option>
+                                </select>
+                            </div>
+                            <div class="field" id="f-ocRegionB"><label>Province / State</label><select id="ocRegionB" onchange="onOfferChange()"></select></div>
+                            <div class="field" id="f-ocManualB" style="display:none"><label>Flat tax rate <span class="field-hint">%</span></label><input type="number" id="ocManualB" value="22" min="0" max="100" step="0.1" oninput="onOfferChange()" /></div>
+                            <div class="field"><label>Monthly rent there <span class="field-hint">optional</span></label><input type="number" id="ocRentB" placeholder="0" min="0" step="50" oninput="onOfferChange()" /></div>
+                        </div>
+
+                        <div class="form-block">
+                            <div class="block-label">Side by side</div>
+                            <div id="ocResults"><div class="empty-msg"><strong>Enter both salaries</strong>Fill in Offer A and Offer B above — Flow shows the real take-home difference, taxes and rent included.</div></div>
+                        </div>
+
+                    </div><!-- /tab-compare -->
 
                 </div><!-- /pane-scroll -->
             </aside>
@@ -767,6 +819,7 @@
         let accounts    = [];
         let investments = [];
         let income      = {};
+        let offerCompare = { a: blankOffer(), b: blankOffer() };
         let listView    = 'monthly';
         let chartView   = 'monthly';
         let donutChart    = null;
@@ -814,8 +867,12 @@
         // format both migrate forward on load.
         const scenarios = Folio.slots.open('flow_save', { defaultName: 'My budget' });
 
+        function blankOffer() {
+            return { label: '', salary: 0, country: 'CA', region: 'ON', manualRate: 22, rent: 0 };
+        }
+
         function collectBlob() {
-            return { version: 1, incomes, taxCfg, housing, expenses, accounts, investments };
+            return { version: 1, incomes, taxCfg, housing, expenses, accounts, investments, offerCompare };
         }
 
         function blankFlowData() {
@@ -825,6 +882,7 @@
                 taxCfg: { country: 'CA', region: 'ON' },
                 housing: { type: 'none', rent: 0, price: 450000, downPct: 10, rate: 6.5, years: 25 },
                 expenses: [], accounts: [], investments: [],
+                offerCompare: { a: blankOffer(), b: blankOffer() },
             };
         }
 
@@ -839,6 +897,10 @@
             if (Array.isArray(d.expenses))    expenses    = d.expenses;
             if (Array.isArray(d.accounts))    accounts    = d.accounts;
             if (Array.isArray(d.investments)) investments = d.investments;
+            offerCompare = {
+                a: { ...blankOffer(), ...(d.offerCompare && d.offerCompare.a) },
+                b: { ...blankOffer(), ...(d.offerCompare && d.offerCompare.b) },
+            };
         }
 
         function restore() {
@@ -903,16 +965,17 @@
         }
 
         // ── Tax UI ────────────────────────────────────────────────────────────
-        function initTaxRegions() {
-            const country = g('taxCountry').value;
-            const sel = g('taxRegion');
+        function fillRegionSelect(sel, country, selected) {
             sel.innerHTML = '';
             const map = country === 'CA' ? CA_PROV : country === 'US' ? US_STATES : null;
             if (!map) return;
             Object.entries(map).sort((a,b)=>a[1][0].localeCompare(b[1][0])).forEach(([code,[name]])=>{
                 const o=document.createElement('option'); o.value=code; o.textContent=name; sel.appendChild(o);
             });
-            if (taxCfg.region && map[taxCfg.region]) sel.value = taxCfg.region;
+            if (selected && map[selected]) sel.value = selected;
+        }
+        function initTaxRegions() {
+            fillRegionSelect(g('taxRegion'), g('taxCountry').value, taxCfg.region);
         }
 
         function updateTaxFields() {
@@ -924,6 +987,73 @@
             g('taxRegionLabel').textContent = country === 'CA' ? 'Province' : 'State';
             if (!isManual) initTaxRegions();
             recalculate();
+        }
+
+        // ── Offer Compare ─────────────────────────────────────────────────────
+        // Two comp packages through the same tax engine as the dashboard.
+        // Regions differ per offer so relocation offers compare honestly.
+        function readOffer(K) {
+            return {
+                label:      g('ocLabel'  + K).value.trim(),
+                salary:     parseFloat(g('ocSalary' + K).value) || 0,
+                country:    g('ocCountry' + K).value,
+                region:     g('ocRegion' + K).value || '',
+                manualRate: parseFloat(g('ocManual' + K).value) || 22,
+                rent:       parseFloat(g('ocRent'   + K).value) || 0,
+            };
+        }
+
+        function onOfferChange() {
+            offerCompare = { a: readOffer('A'), b: readOffer('B') };
+            persist();
+            renderOfferCompare();
+        }
+
+        function onOfferCountryChange(K) {
+            const country = g('ocCountry' + K).value;
+            g('f-ocRegion' + K).style.display = country === 'manual' ? 'none' : 'block';
+            g('f-ocManual' + K).style.display = country === 'manual' ? 'block' : 'none';
+            fillRegionSelect(g('ocRegion' + K), country, country === 'CA' ? 'ON' : country === 'US' ? 'CA' : '');
+            onOfferChange();
+        }
+
+        function offerNet(o) {
+            const bk = FOLIO_TAX.breakdown(o.salary, { country: o.country, region: o.region }, o.manualRate);
+            const yNet = o.salary - bk.total;
+            return {
+                yNet,
+                mNet: yNet / 12,
+                mAfterRent: yNet / 12 - (o.rent || 0),
+                rate: o.salary > 0 ? (bk.total / o.salary) * 100 : 0,
+            };
+        }
+
+        function renderOfferCompare() {
+            const el = g('ocResults');
+            const a = offerCompare.a, b = offerCompare.b;
+            if (!(a.salary > 0 && b.salary > 0)) {
+                el.innerHTML = `<div class="empty-msg"><strong>Enter both salaries</strong>Fill in Offer A and Offer B above — Flow shows the real take-home difference, taxes and rent included.</div>`;
+                return;
+            }
+            const na = offerNet(a), nb = offerNet(b);
+            const nameA = a.label || 'Offer A', nameB = b.label || 'Offer B';
+            const useRent = (a.rent || 0) > 0 || (b.rent || 0) > 0;
+            const row = (name, o, n) => `
+                <div class="stat-row">
+                    <div class="stat-row-label">${esc(name)}</div>
+                    <div style="text-align:right">
+                        <div class="stat-row-value">${fmt(useRent ? n.mAfterRent : n.mNet)}/mo</div>
+                        <div class="stat-row-sub">${fmt(n.yNet)}/yr net · ${n.rate.toFixed(1)}% tax${useRent ? ` · rent ${fmt(o.rent || 0)}` : ''}</div>
+                    </div>
+                </div>`;
+            const va = useRent ? na.mAfterRent : na.mNet;
+            const vb = useRent ? nb.mAfterRent : nb.mNet;
+            const diff = vb - va;
+            const winner = diff >= 0 ? nameB : nameA;
+            const verdict = Math.abs(diff) < 1
+                ? `<div class="oc-verdict oc-even">Dead even — both offers leave the same in your pocket${useRent ? ' after rent' : ''}.</div>`
+                : `<div class="oc-verdict">${esc(winner)} comes out ahead by <b>${fmt(Math.abs(diff))}/mo</b> — ${fmt(Math.abs(diff) * 12)}/yr${useRent ? ', after rent' : ''}</div>`;
+            el.innerHTML = row(nameA, a, na) + row(nameB, b, nb) + verdict;
         }
 
         function updateSrcFields() {
@@ -1525,6 +1655,20 @@
             g('homeYears').value = housing.years   ?? 25;
             setHousingType(housing.type);
             if (housing.type === 'buy') renderMortgageCard();
+
+            // offer compare inputs
+            ['A', 'B'].forEach((K) => {
+                const o = offerCompare[K.toLowerCase()];
+                g('ocLabel'  + K).value = o.label  || '';
+                g('ocSalary' + K).value = o.salary || '';
+                g('ocRent'   + K).value = o.rent   || '';
+                g('ocCountry' + K).value = o.country || 'CA';
+                g('ocManual' + K).value = o.manualRate ?? 22;
+                g('f-ocRegion' + K).style.display = o.country === 'manual' ? 'none' : 'block';
+                g('f-ocManual' + K).style.display = o.country === 'manual' ? 'block' : 'none';
+                fillRegionSelect(g('ocRegion' + K), o.country, o.region);
+            });
+            renderOfferCompare();
 
             renderIncomeSources();
             renderExpenses();

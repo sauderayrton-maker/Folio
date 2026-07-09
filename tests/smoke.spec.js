@@ -249,6 +249,31 @@ test.describe("Flow", () => {
         expect(migrated.oldKey).toBeNull();
     });
 
+    test("Offer Compare: cross-region take-home verdict, persisted", async ({
+        page,
+    }) => {
+        await page.click('.section-tab[data-tab="compare"]');
+        await page.fill("#ocSalaryA", "80000"); // Canada / Ontario default
+        await page.selectOption("#ocCountryB", "US");
+        await page.selectOption("#ocRegionB", "TX");
+        await page.fill("#ocSalaryB", "80000");
+
+        // same gross, but no state tax in TX → Offer B nets more
+        await expect(page.locator(".oc-verdict")).toContainText("Offer B");
+        await expect(page.locator("#ocResults")).toContainText("% tax");
+
+        // rent can flip the verdict
+        await page.fill("#ocRentB", "2000");
+        await page.fill("#ocRentA", "1000");
+        await expect(page.locator(".oc-verdict")).toContainText("Offer A");
+
+        // survives reload inside the scenario blob
+        await page.reload();
+        await page.click('.section-tab[data-tab="compare"]');
+        await expect(page.locator("#ocSalaryA")).toHaveValue("80000");
+        await expect(page.locator(".oc-verdict")).toContainText("Offer A");
+    });
+
     test("removing an expense offers working Undo", async ({ page }) => {
         await page.click('.section-tab[data-tab="spending"]');
         await page.fill("#expName", "Groceries");
